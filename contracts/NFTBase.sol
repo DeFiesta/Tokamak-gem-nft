@@ -1,120 +1,136 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {NFTAccessControl} from "./NFTAccessControl.sol";
+import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
+import {SiringClockAuction} from "./auction/SiringClockAuction.sol";
 
-contract NFTBase is ERC721, Ownable {
+contract NFTBase is NFTAccessControl, SaleClockAuction {
     struct tkNFT {
-        address owner;
-        uint256 tokenId;
-        string genes; // Store genes as a string
+        uint256 genes;
         uint64 birthTime;
-        uint32 matronId; //mom's id
-        uint32 sireId; // dad's id
-        uint32 siringWithId; //if set then pregnant
-        uint16 cooldownIndex; // like age. bigger it is, longer is the cooldown
+        uint64 cooldownEndBlock;
+        uint32 matronId;
+        uint32 sireId;
+        uint32 siringWithId;
+        uint16 cooldownIndex;
         uint16 generation;
     }
 
-    tkNFT[] public tkNFTs;
+    /**
+     * CONSTANTS **
+     */
 
-    uint256 private _currentTokenId = 0;
+    uint32[14] public cooldowns = [
+        uint32(1 minutes),
+        uint32(2 minutes),
+        uint32(5 minutes),
+        uint32(10 minutes),
+        uint32(30 minutes),
+        uint32(1 hours),
+        uint32(2 hours),
+        uint32(4 hours),
+        uint32(8 hours),
+        uint32(16 hours),
+        uint32(1 days),
+        uint32(2 days),
+        uint32(4 days),
+        uint32(7 days)
+    ];
 
-    event Minted(address indexed _to, uint256 _newTokenId, string genes);
+    uint256 public secondsPerBlock = 15;
 
-    constructor() ERC721("Tokamak GEM NFT", "TKNFT") Ownable(msg.sender) {}
+    /**
+     * STORAGE **
+     */
 
-    function mintTkNFT(
-        address to,
-        string memory genes,
-        uint64 birthTime,
-        uint32 matronId,
-        uint32 sireId,
-        uint32 siringWithId,
-        uint16 cooldownIndex,
-        uint16 generation
-    ) external onlyOwner {
-        require(_isValidGene(genes), "Invalid gene format");
-        _incrementTokenId();
-        uint256 newTokenId = _getTokenId();
-        _mintTkNFT(to, newTokenId, genes, birthTime, matronId, sireId, siringWithId, cooldownIndex, generation);
-        emit Minted(to, newTokenId, genes);
+    tkNFT[] tkNFTs;
+    mapping(uint256 => address) public NFTIndexToOwner;
+    mapping(address => uint256) ownershipTokenCount;
+    mapping(uint256 => address) public NFTIndexToApproved;
+    mapping(uint256 => address) public sireAllowedToAddress;
+    SaleClockAuction public saleAuction;
+    SiringClockAuction public siringAuction;
+
+    /**
+     * EVENTS **
+     */
+
+    event Birth(address owner, uint256 kittyId, uint256 matronId, uint256 sireId, uint256 genes);
+    event Transfer(address from, address to, uint256 tokenId);
+
+    constructor(address _nftaddr, uint256 _cut) SaleClockAuction(_nftaddr, _cut) {}
+
+    // ----------------------------------------------------------------------------------------
+    // ----------------------------- OVERRIDE FUNCTIONS----------------------------------------
+    // ----------------------------------------------------------------------------------------
+
+    function pause() public override(NFTAccessControl) onlyCLevel whenNotPaused {
+        super.pause();
     }
 
-    function _mintTkNFT(
-        address _to,
-        uint256 _newTokenId,
-        string memory _genes,
-        uint64 _birthTime,
-        uint32 _matronId,
-        uint32 _sireId,
-        uint32 _siringWithId,
-        uint16 _cooldownIndex,
-        uint16 _generation
-    ) internal {
-        tkNFT memory newTkNFT = tkNFT({
-            owner: _to,
-            tokenId: _newTokenId,
+    modifier whenNotPaused() override(NFTAccessControl) {
+        require(!paused, "Pausable: paused");
+        _;
+    }
+
+    modifier whenPaused() override(NFTAccessControl) {
+        require(paused, "Pausable: not paused");
+        _;
+    }
+
+    // ----------------------------------------------------------------------------------------
+    // ----------------------------- INTERNAL FUNCTIONS----------------------------------------
+    // ----------------------------------------------------------------------------------------
+
+    function _transferNFT(address _from, address _to, uint256 _tokenId) internal virtual {
+        ownershipTokenCount[_to]++;
+        NFTIndexToOwner[_tokenId] = _to;
+        if (_from != address(0)) {
+            ownershipTokenCount[_from]--;
+            delete sireAllowedToAddress[_tokenId];
+            delete NFTIndexToApproved[_tokenId];
+        }
+        emit Transfer(_from, _to, _tokenId);
+    }
+
+    function _createNFT(uint256 _matronId, uint256 _sireId, uint256 _generation, uint256 _genes, address _owner)
+        internal
+        returns (uint256)
+    {
+        require(_matronId == uint256(uint32(_matronId)));
+        require(_sireId == uint256(uint32(_sireId)));
+        require(_generation == uint256(uint16(_generation)));
+
+        uint16 cooldownIndex = uint16(_generation / 2);
+        if (cooldownIndex > 13) {
+            cooldownIndex = 13;
+        }
+
+        tkNFT memory _tkNFT = tkNFT({
             genes: _genes,
-            birthTime: _birthTime,
-            matronId: _matronId,
-            sireId: _sireId,
-            siringWithId: _siringWithId,
-            cooldownIndex: _cooldownIndex,
-            generation: _generation
+            birthTime: uint64(block.timestamp),
+            cooldownEndBlock: 0,
+            matronId: uint32(_matronId),
+            sireId: uint32(_sireId),
+            siringWithId: 0,
+            cooldownIndex: cooldownIndex,
+            generation: uint16(_generation)
         });
+        tkNFTs.push(_tkNFT);
+        uint256 newTKNFTId = tkNFTs.length - 1;
 
-        tkNFTs.push(newTkNFT);
+        require(newTKNFTId == uint256(uint32(newTKNFTId)));
 
-        _safeMint(_to, _newTokenId);
+        emit Birth(_owner, newTKNFTId, uint256(_tkNFT.matronId), uint256(_tkNFT.sireId), _tkNFT.genes);
+
+        _transferNFT(address(0), _owner, newTKNFTId);
+
+        return newTKNFTId;
     }
 
-    function _getTokenId() private view returns (uint256) {
-        return _currentTokenId;
-    }
-
-    function _incrementTokenId() private {
-        _currentTokenId++;
-    }
-
-    function _isValidGene(string memory gene) private pure returns (bool) {
-        bytes memory b = bytes(gene);
-        if (b.length != 10) return false; // Ensure the gene string is 10 characters long (5 pairs of hex digits)
-        for (uint256 i = 0; i < b.length; i++) {
-            if (
-                !(b[i] >= 0x30 && b[i] <= 0x39) // 0-9
-                    && !(b[i] >= 0x41 && b[i] <= 0x46) // A-F
-                    && !(b[i] >= 0x61 && b[i] <= 0x66) // a-f
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // Function to get the gene characteristics
-    function getGeneCharacteristics(uint256 tokenId) public view returns (string memory) {
-        require(tokenId < tkNFTs.length, "Token ID does not exist");
-        return tkNFTs[tokenId].genes;
-    }
-
-    // Function to parse gene characteristics
-    function parseGene(string memory gene) public pure returns (string memory) {
-        require(_isValidGene(gene), "Invalid gene format");
-        bytes memory b = bytes(gene);
-        string memory eyeColor = _getEyeColor(b[0], b[1]);
-        // Add more parsing logic for other characteristics here
-        return eyeColor;
-    }
-
-    function _getEyeColor(bytes1 x1, bytes1 x2) private pure returns (string memory) {
-        // Example logic to determine eye color from gene
-        if (x1 == 0x31 && x2 == 0x34) {
-            // 14 in hex
-            return "yellow";
-        }
-        // Add more conditions for other eye colors
-        return "unknown";
+    function setSecondsPerBlock(uint256 secs) external onlyCLevel {
+        require(secs < cooldowns[0]);
+        secondsPerBlock = secs;
     }
 }
