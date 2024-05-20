@@ -10,7 +10,6 @@ contract SiringClockAuction is ClockAuction {
     //  right auction in our setSiringAuctionAddress() call.
     bool public isSiringClockAuction = true;
 
-    // Delegate constructor
     constructor(address _nftAddr, uint256 _cut) ClockAuction(_nftAddr, _cut) {}
 
     /// @dev Creates and begins a new auction. Since this function is wrapped,

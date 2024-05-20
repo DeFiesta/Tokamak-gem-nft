@@ -15,16 +15,16 @@ contract NFTCore is NFTMinting {
         cooAddress = msg.sender;
 
         // start with the mythical NFT 0 - so we don't have generation-0 parent issues
-        _createNFT(0, 0, 0, uint256(-1), address(0));
+        _createNFT(0, 0, 0, 0, address(0));
     }
 
     function withdrawBalance() external onlyCFO {
-        uint256 balance = this.balance;
+        uint256 balance = address(this).balance;
         // Subtract all the currently pregnant kittens we have, plus 1 of margin.
         uint256 subtractFees = (pregnantTkNFT + 1) * autoBirthFee;
 
         if (balance > subtractFees) {
-            cfoAddress.send(balance - subtractFees);
+            payable(cfoAddress).transfer(balance - subtractFees);
         }
     }
 

@@ -63,7 +63,7 @@ contract ClockAuction is NFTAccessControl, ClockAuctionBase {
         uint256 _endingPrice,
         uint256 _duration,
         address _seller
-    ) external whenNotPaused {
+    ) external virtual whenNotPaused {
         // Sanity check that no inputs overflow how many bits we've allocated
         // to store them in the auction struct.
         require(_startingPrice == uint256(uint128(_startingPrice)));
@@ -80,7 +80,7 @@ contract ClockAuction is NFTAccessControl, ClockAuctionBase {
     /// @dev Bids on an open auction, completing the auction and transferring
     ///  ownership of the NFT if enough Ether is supplied.
     /// @param _tokenId - ID of token to bid on.
-    function bid(uint256 _tokenId) external payable whenNotPaused {
+    function bid(uint256 _tokenId) external payable virtual whenNotPaused {
         // _bid will throw if the bid or funds transfer fails
         _bid(_tokenId, msg.value);
         _transfer(msg.sender, _tokenId);

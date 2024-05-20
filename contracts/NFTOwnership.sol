@@ -36,7 +36,7 @@ contract NFTOwnership is NFTBase, ERC721 {
 
     bytes4 constant InterfaceSignature_ERC165 = bytes4(keccak256("supportsInterface(bytes4)"));
 
-    constructor(address _nftaddr, uint256 _cut) ERC721("TokamakNFT", "TKNFT") NFTBase(_nftaddr, _cut) {}
+    constructor() ERC721("TokamakNFT", "TKNFT") {}
 
     /// @notice Introspection interface as per ERC-165 (https://github.com/ethereum/EIPs/issues/165).
     ///  Returns true for any standardized interfaces implemented by this contract. We implement
@@ -107,7 +107,7 @@ contract NFTOwnership is NFTBase, ERC721 {
         require(_to != address(siringAuction));
 
         // You can only send your own cat.
-        require(_owns(msg.sender, _tokenId));
+        require(_ownsNFT(msg.sender, _tokenId));
 
         // Reassign ownership, clear pending approvals, emit Transfer event.
         _transferNFT(msg.sender, _to, _tokenId);
@@ -121,7 +121,7 @@ contract NFTOwnership is NFTBase, ERC721 {
     /// @dev Required for ERC-721 compliance.
     function approveNFT(address _to, uint256 _tokenId) external whenNotPaused {
         // Only an owner can grant transfer approval.
-        require(_owns(msg.sender, _tokenId));
+        require(_ownsNFT(msg.sender, _tokenId));
 
         // Register the approval (replacing any previous approval).
         _approve(_tokenId, _to);
@@ -146,7 +146,7 @@ contract NFTOwnership is NFTBase, ERC721 {
         require(_to != address(this));
         // Check for approval and valid ownership
         require(_approvedFor(msg.sender, _tokenId));
-        require(_owns(_from, _tokenId));
+        require(_ownsNFT(_from, _tokenId));
 
         // Reassign ownership (also clears pending approvals and emits Transfer event).
         _transferNFT(_from, _to, _tokenId);

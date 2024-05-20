@@ -5,7 +5,7 @@ import {NFTAccessControl} from "./NFTAccessControl.sol";
 import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
 import {SiringClockAuction} from "./auction/SiringClockAuction.sol";
 
-contract NFTBase is NFTAccessControl, SaleClockAuction {
+contract NFTBase is NFTAccessControl {
     struct tkNFT {
         uint256 genes;
         uint64 birthTime;
@@ -57,27 +57,7 @@ contract NFTBase is NFTAccessControl, SaleClockAuction {
      */
 
     event Birth(address owner, uint256 kittyId, uint256 matronId, uint256 sireId, uint256 genes);
-    event Transfer(address from, address to, uint256 tokenId);
-
-    constructor(address _nftaddr, uint256 _cut) SaleClockAuction(_nftaddr, _cut) {}
-
-    // ----------------------------------------------------------------------------------------
-    // ----------------------------- OVERRIDE FUNCTIONS----------------------------------------
-    // ----------------------------------------------------------------------------------------
-
-    function pause() public override(NFTAccessControl) onlyCLevel whenNotPaused {
-        super.pause();
-    }
-
-    modifier whenNotPaused() override(NFTAccessControl) {
-        require(!paused, "Pausable: paused");
-        _;
-    }
-
-    modifier whenPaused() override(NFTAccessControl) {
-        require(paused, "Pausable: not paused");
-        _;
-    }
+    event TransferTKNFT(address from, address to, uint256 tokenId);
 
     // ----------------------------------------------------------------------------------------
     // ----------------------------- INTERNAL FUNCTIONS----------------------------------------
@@ -91,7 +71,7 @@ contract NFTBase is NFTAccessControl, SaleClockAuction {
             delete sireAllowedToAddress[_tokenId];
             delete NFTIndexToApproved[_tokenId];
         }
-        emit Transfer(_from, _to, _tokenId);
+        emit TransferTKNFT(_from, _to, _tokenId);
     }
 
     function _createNFT(uint256 _matronId, uint256 _sireId, uint256 _generation, uint256 _genes, address _owner)
