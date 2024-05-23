@@ -6,7 +6,7 @@ import {NFTAccessControl} from "../NFTAccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract ClockAuction is NFTAccessControl, ClockAuctionBase {
+contract ClockAuction is ClockAuctionBase {
     /// @dev The ERC-165 interface signature for ERC-721.
     ///  Ref: https://github.com/ethereum/EIPs/issues/165
     ///  Ref: https://github.com/ethereum/EIPs/issues/721

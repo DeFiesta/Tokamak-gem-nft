@@ -9,7 +9,15 @@ if (!SEPOLIA_ARB_API_URL || !PRIVATE_KEY) {
 }
 
 module.exports = {
-  solidity: "0.8.20",
+  solidity: {
+    version: "0.8.20",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200, // You can adjust this value to find the optimal balance between size and gas efficiency
+      },
+    },
+  },
   defaultNetwork: "sepolia",
   networks: {
     hardhat: {},

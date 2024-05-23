@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTMinting} from "./NFTMinting.sol";
+import {NFTAuction} from "./auction/NFTAuction.sol";
 
-contract NFTCore is NFTMinting {
+contract NFTCore is NFTAuction {
     uint256 public pregnantTkNFT;
-    uint256 public autoBirthFee;
+
+    constructor(address _nftAddr, uint256 _cut) NFTAuction(_nftAddr, _cut) {}
 
     function tkNFTCore() public {
         paused = true;
@@ -18,7 +19,7 @@ contract NFTCore is NFTMinting {
         _createNFT(0, 0, 0, 0, address(0));
     }
 
-    function withdrawBalance() external onlyCFO {
+    function tkNFTwithdrawBalance() external onlyCFO {
         uint256 balance = address(this).balance;
         // Subtract all the currently pregnant kittens we have, plus 1 of margin.
         uint256 subtractFees = (pregnantTkNFT + 1) * autoBirthFee;

@@ -10,7 +10,7 @@ contract ERC721Metadata {
     /// @dev Given a token Id, returns a byte array that is supposed to be converted into string.
     function getMetadata(uint256 _tokenId, string memory)
         public
-        view
+        pure
         returns (bytes32[4] memory buffer, uint256 count)
     {
         if (_tokenId == 1) {
@@ -41,7 +41,7 @@ contract NFTOwnership is NFTBase, ERC721 {
     /// @notice Introspection interface as per ERC-165 (https://github.com/ethereum/EIPs/issues/165).
     ///  Returns true for any standardized interfaces implemented by this contract. We implement
     ///  ERC-165 (obviously!) and ERC-721.
-    function supportsInterfaceNFT(bytes4 _interfaceID) external view returns (bool) {
+    function supportsInterfaceNFT(bytes4 _interfaceID) external pure returns (bool) {
         // DEBUG ONLY
         //require((InterfaceSignature_ERC165 == 0x01ffc9a7) && (InterfaceSignature_ERC721 == 0x9a20483d));
 
@@ -113,11 +113,11 @@ contract NFTOwnership is NFTBase, ERC721 {
         _transferNFT(msg.sender, _to, _tokenId);
     }
 
-    /// @notice Grant another address the right to transfer a specific Kitty via
+    /// @notice Grant another address the right to transfer a specific tkNFT via
     ///  transferFrom(). This is the preferred flow for transfering NFTs to contracts.
     /// @param _to The address to be granted transfer approval. Pass address(0) to
     ///  clear all approvals.
-    /// @param _tokenId The ID of the Kitty that can be transferred if this call succeeds.
+    /// @param _tokenId The ID of the tkNFT that can be transferred if this call succeeds.
     /// @dev Required for ERC-721 compliance.
     function approveNFT(address _to, uint256 _tokenId) external whenNotPaused {
         // Only an owner can grant transfer approval.
@@ -130,12 +130,12 @@ contract NFTOwnership is NFTBase, ERC721 {
         emit Approval(msg.sender, _to, _tokenId);
     }
 
-    /// @notice Transfer a Kitty owned by another address, for which the calling address
+    /// @notice Transfer a tkNFT owned by another address, for which the calling address
     ///  has previously been granted transfer approval by the owner.
-    /// @param _from The address that owns the Kitty to be transfered.
-    /// @param _to The address that should take ownership of the Kitty. Can be any address,
+    /// @param _from The address that owns the tkNFT to be transfered.
+    /// @param _to The address that should take ownership of the tkNFT. Can be any address,
     ///  including the caller.
-    /// @param _tokenId The ID of the Kitty to be transferred.
+    /// @param _tokenId The ID of the tkNFT to be transferred.
     /// @dev Required for ERC-721 compliance.
     function transferNFTFrom(address _from, address _to, uint256 _tokenId) external whenNotPaused {
         // Safety check to prevent against an unexpected 0x0 default.
@@ -158,7 +158,7 @@ contract NFTOwnership is NFTBase, ERC721 {
         return tkNFTs.length - 1;
     }
 
-    /// @notice Returns the address currently assigned ownership of a given Kitty.
+    /// @notice Returns the address currently assigned ownership of a given tkNFT.
     /// @dev Required for ERC-721 compliance.
     function ownerOfNFT(uint256 _tokenId) external view returns (address owner) {
         owner = NFTIndexToOwner[_tokenId];
@@ -166,10 +166,10 @@ contract NFTOwnership is NFTBase, ERC721 {
         require(owner != address(0));
     }
 
-    /// @notice Returns a list of all Kitty IDs assigned to an address.
+    /// @notice Returns a list of all tkNFT IDs assigned to an address.
     /// @param _owner The owner whose Kitties we are interested in.
     /// @dev This method MUST NEVER be called by smart contract code. First, it's fairly
-    ///  expensive (it walks the entire Kitty
+    ///  expensive (it walks the entire tkNFT
 
     function tokensOfOwner(address _owner) external view returns (uint256[] memory ownerTokens) {
         uint256 tokenCount = balanceOf(_owner);
@@ -200,7 +200,7 @@ contract NFTOwnership is NFTBase, ERC721 {
     /// @dev Adapted from memcpy() by @arachnid (Nick Johnson <arachnid@notdot.net>)
     ///  This method is licenced under the Apache License.
     ///  Ref: https://github.com/Arachnid/solidity-stringutils/blob/2f6ca9accb48ae14c66f1437ec50ed19a0616f78/strings.sol
-    function _memcpy(uint256 _dest, uint256 _src, uint256 _len) private view {
+    function _memcpy(uint256 _dest, uint256 _src, uint256 _len) private pure {
         // Copy word-length chunks while possible
         for (; _len >= 32; _len -= 32) {
             assembly {
@@ -222,7 +222,7 @@ contract NFTOwnership is NFTBase, ERC721 {
     /// @dev Adapted from toString(slice) by @arachnid (Nick Johnson <arachnid@notdot.net>)
     ///  This method is licenced under the Apache License.
     ///  Ref: https://github.com/Arachnid/solidity-stringutils/blob/2f6ca9accb48ae14c66f1437ec50ed19a0616f78/strings.sol
-    function _toString(bytes32[4] memory _rawBytes, uint256 _stringLength) private view returns (string memory) {
+    function _toString(bytes32[4] memory _rawBytes, uint256 _stringLength) private pure returns (string memory) {
         string memory outputString = new string(_stringLength);
         uint256 outputPtr;
         uint256 bytesPtr;
@@ -239,7 +239,7 @@ contract NFTOwnership is NFTBase, ERC721 {
 
     /// @notice Returns a URI pointing to a metadata package for this token conforming to
     ///  ERC-721 (https://github.com/ethereum/EIPs/issues/721)
-    /// @param _tokenId The ID number of the Kitty whose metadata should be returned.
+    /// @param _tokenId The ID number of the tkNFT whose metadata should be returned.
     function tokenMetadata(uint256 _tokenId, string memory _preferredTransport)
         external
         view

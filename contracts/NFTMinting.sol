@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {ClockAuction} from "./auction/ClockAuction.sol";
-import {NFTBase} from "./NFTBase.sol";
+import {NFTBreeding} from "./NFTBreeding.sol";
 import {NFTAccessControl} from "./NFTAccessControl.sol";
 
-contract NFTMinting is NFTAccessControl, NFTBase {
+contract NFTMinting is NFTBreeding {
     uint256 public constant PROMO_CREATION_LIMIT = 5000;
     uint256 public constant GEN0_CREATION_LIMIT = 45000;
 
@@ -26,7 +26,7 @@ contract NFTMinting is NFTAccessControl, NFTBase {
         _createNFT(0, 0, 0, _genes, NFTOwner);
     }
 
-    // Creates a new gen0 kitty and an auction for it.
+    // Creates a new gen0 tkNFT and an auction for it.
     /*
     function createGen0Auction(uint256 _genes) external onlyCOO {
         require(gen0CreatedCount < GEN0_CREATION_LIMIT);

@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTBreeding} from "../NFTBreeding.sol";
+import {NFTMinting} from "../NFTMinting.sol";
 import {SaleClockAuction} from "./SaleClockAuction.sol";
 import {SiringClockAuction} from "./SiringClockAuction.sol";
+import {ClockAuctionBase} from "./ClockAuctionBase.sol";
 
 /// @title Handles creating auctions for sale and siring of kitties.
 ///  This wrapper of ReverseAuction exists only so that users can create
 ///  auctions with only one transaction.
-contract NFTAuction is NFTBreeding {
-    // @notice The auction contract variables are defined in KittyBase to allow
-    //  us to refer to them in KittyOwnership to prevent accidental transfers.
+contract NFTAuction is NFTMinting, SaleClockAuction {
+    // @notice The auction contract variables are defined in NFTBase to allow
+    //  us to refer to them in NFTOwnership to prevent accidental transfers.
     // `saleAuction` refers to the auction for gen0 and p2p sale of kitties.
-    // `siringAuction` refers to the auction for siring rights of kitties.
+    // `siringAuction` refers to the auction for siring rights of kitties.t.
 
-    /// @dev Sets the reference to the sale auction.
-    /// @param _address - Address of sale contract.
+    constructor(address _nftAddr, uint256 _cut) SaleClockAuction(_nftAddr, _cut) {}
+
     function setSaleAuctionAddress(address _address) external onlyCEO {
         SaleClockAuction candidateContract = SaleClockAuction(_address);
 
@@ -36,41 +37,41 @@ contract NFTAuction is NFTBreeding {
         siringAuction = candidateContract;
     }
 
-    /// @dev Put a kitty up for auction.
+    /// @dev Put a tkNFT up for auction.
     ///  Does some ownership trickery to create auctions in one tx.
     function createSaleAuction(uint256 _nftId, uint256 _startingPrice, uint256 _endingPrice, uint256 _duration)
         external
         whenNotPaused
     {
         // Auction contract checks input sizes
-        // If kitty is already on any auction, this will throw
+        // If tkNFT is already on any auction, this will throw
         // because it will be owned by the auction contract.
-        require(_ownsNFT(msg.sender, _nftId));
-        // Ensure the kitty is not pregnant to prevent the auction
+        require(_owns(msg.sender, _nftId));
+        // Ensure the tkNFT is not pregnant to prevent the auction
         // contract accidentally receiving ownership of the child.
-        // NOTE: the kitty IS allowed to be in a cooldown.
+        // NOTE: the tkNFT IS allowed to be in a cooldown.
         require(!isPregnant(_nftId));
         _approve(_nftId, address(saleAuction));
         // Sale auction throws if inputs are invalid and clears
-        // transfer and sire approval after escrowing the kitty.
+        // transfer and sire approval after escrowing the tkNFT.
         saleAuction.createAuction(_nftId, _startingPrice, _endingPrice, _duration, msg.sender);
     }
 
-    /// @dev Put a kitty up for auction to be sire.
-    ///  Performs checks to ensure the kitty can be sired, then
+    /// @dev Put a tkNFT up for auction to be sire.
+    ///  Performs checks to ensure the tkNFT can be sired, then
     ///  delegates to reverse auction.
     function createSiringAuction(uint256 _nftId, uint256 _startingPrice, uint256 _endingPrice, uint256 _duration)
         external
         whenNotPaused
     {
         // Auction contract checks input sizes
-        // If kitty is already on any auction, this will throw
+        // If tkNFT is already on any auction, this will throw
         // because it will be owned by the auction contract.
         require(_ownsNFT(msg.sender, _nftId));
         require(_isReadyToBreed(tkNFTs[_nftId]));
         _approve(_nftId, address(siringAuction));
         // Siring auction throws if inputs are invalid and clears
-        // transfer and sire approval after escrowing the kitty.
+        // transfer and sire approval after escrowing the tkNFT.
         siringAuction.createAuction(_nftId, _startingPrice, _endingPrice, _duration, msg.sender);
     }
 
@@ -94,7 +95,7 @@ contract NFTAuction is NFTBreeding {
     }
 
     /// @dev Transfers the balance of the sale auction contract
-    /// to the KittyCore contract. We use two-step withdrawal to
+    /// to the tkNFTCore contract. We use two-step withdrawal to
     /// prevent two transfer calls in the auction bid function.
     function withdrawAuctionBalances() external onlyCLevel {
         saleAuction.withdrawBalance();

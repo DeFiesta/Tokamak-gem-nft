@@ -15,9 +15,6 @@ interface GeneScienceInterface {
 }
 
 contract NFTBreeding is NFTOwnership {
-    /// @dev The Pregnant event is fired when two cats successfully breed and the pregnancy
-    ///  timer begins for the matron.
-    event Pregnant(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
 
     /// @notice The minimum payment required to use breedWithAuto(). This fee goes towards
     ///  the gas cost paid by whatever calls giveBirth(), and can be dynamically updated by
@@ -30,6 +27,10 @@ contract NFTBreeding is NFTOwnership {
     /// @dev The address of the sibling contract that is used to implement the sooper-sekret
     ///  genetic combination algorithm.
     GeneScienceInterface public geneScience;
+
+    /// @dev The Pregnant event is fired when two cats successfully breed and the pregnancy
+    ///  timer begins for the matron.
+    event Pregnant(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.
     /// @param _address An address of a GeneScience contract instance to be used from this point forward.
@@ -207,7 +208,7 @@ contract NFTBreeding is NFTOwnership {
         pregnantKitties++;
 
         // Emit the pregnancy event.
-        Pregnant(NFTIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
+        emit Pregnant(NFTIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
     }
 
     /// @notice Breed a Kitty you own (as matron) with a sire that you own, or for which you

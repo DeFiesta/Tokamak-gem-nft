@@ -11,7 +11,7 @@ contract SaleClockAuction is ClockAuction, SiringClockAuction {
     //  right auction in our setSaleAuctionAddress() call.
     bool public isSaleClockAuction = true;
 
-    // Tracks last 5 sale price of gen0 kitty sales
+    // Tracks last 5 sale price of gen0 tkNFT sales
     uint256 public gen0SaleCount;
     uint256[5] public lastGen0SalePrices;
 

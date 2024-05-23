@@ -56,7 +56,7 @@ contract NFTBase is NFTAccessControl {
      * EVENTS **
      */
 
-    event Birth(address owner, uint256 kittyId, uint256 matronId, uint256 sireId, uint256 genes);
+    event Birth(address owner, uint256 tkNFTId, uint256 matronId, uint256 sireId, uint256 genes);
     event TransferTKNFT(address from, address to, uint256 tokenId);
 
     // ----------------------------------------------------------------------------------------

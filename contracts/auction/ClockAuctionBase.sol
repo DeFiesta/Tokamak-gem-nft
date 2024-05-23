@@ -2,11 +2,13 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {NFTAccessControl} from "../NFTAccessControl.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /// @title Auction Core
 /// @dev Contains models, variables, and internal methods for the auction.
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
-contract ClockAuctionBase {
+contract ClockAuctionBase is NFTAccessControl {
     // Represents an auction on an NFT
     struct Auction {
         // Current owner of NFT
@@ -39,7 +41,7 @@ contract ClockAuctionBase {
     /// @dev Returns true if the claimant owns the token.
     /// @param _claimant - Address claiming to own the token.
     /// @param _tokenId - ID of token whose ownership to verify.
-    function _owns(address _claimant, uint256 _tokenId) internal view returns (bool) {
+    function _owns(address _claimant, uint256 _tokenId) public view returns (bool) {
         return (nonFungibleContract.ownerOf(_tokenId) == _claimant);
     }
 

@@ -13,7 +13,7 @@ contract SiringClockAuction is ClockAuction {
     constructor(address _nftAddr, uint256 _cut) ClockAuction(_nftAddr, _cut) {}
 
     /// @dev Creates and begins a new auction. Since this function is wrapped,
-    /// require sender to be KittyCore contract.
+    /// require sender to be tkNFTCore contract.
     /// @param _tokenId - ID of token to auction, sender must be owner.
     /// @param _startingPrice - Price of item (in wei) at beginning of auction.
     /// @param _endingPrice - Price of item (in wei) at end of auction.
@@ -25,7 +25,7 @@ contract SiringClockAuction is ClockAuction {
         uint256 _endingPrice,
         uint256 _duration,
         address _seller
-    ) external override(ClockAuction) {
+    ) external virtual override(ClockAuction) {
         // Sanity check that no inputs overflow how many bits we've allocated
         // to store them in the auction struct.
         require(_startingPrice == uint256(uint128(_startingPrice)));
@@ -40,15 +40,15 @@ contract SiringClockAuction is ClockAuction {
     }
 
     /// @dev Places a bid for siring. Requires the sender
-    /// is the KittyCore contract because all bid methods
-    /// should be wrapped. Also returns the kitty to the
+    /// is the tkNFTCore contract because all bid methods
+    /// should be wrapped. Also returns the tkNFT to the
     /// seller rather than the winner.
-    function bid(uint256 _tokenId) external payable override(ClockAuction) {
+    function bid(uint256 _tokenId) external payable virtual override(ClockAuction) {
         require(msg.sender == address(nonFungibleContract));
         address seller = tokenIdToAuction[_tokenId].seller;
         // _bid checks that token ID is valid and will throw if bid fails
         _bid(_tokenId, msg.value);
-        // We transfer the kitty back to the seller, the winner will get
+        // We transfer the tkNFT back to the seller, the winner will get
         // the offspring
         _transfer(seller, _tokenId);
     }
