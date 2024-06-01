@@ -20,7 +20,13 @@ module.exports = {
   },
   defaultNetwork: "sepolia",
   networks: {
-    hardhat: {},
+    hardhat: {
+      forking: {
+        enabled: true,
+        url: process.env.ETH_NODE_URI_MAINNET
+      },
+      chainId: 1,
+    },
     sepolia: {
       url: SEPOLIA_ARB_API_URL,
       accounts: [`0x${PRIVATE_KEY}`]
