@@ -12,7 +12,7 @@ contract NFTMinting is NFTBreeding {
     uint256 public constant GEN0_STARTING_PRICE = 10 * 1e15; // 10 finney in wei
     uint256 public constant GEN0_AUCTION_DURATION = 1 days;
 
-    // Counts the number of cats the contract owner has created.
+    // Counts the number of nfts the contract owner has created.
     uint256 public promoCreatedCount;
     uint256 public gen0CreatedCount;
 
