@@ -15,10 +15,6 @@ contract AutoRefactorCoinageFactory is CoinageFactoryI, Ownable {
 
     address public autoCoinageLogic;
 
-    constructor(address initialOwner) Ownable(initialOwner) {
-        // Additional initialization if needed
-    }
-
     function setAutoCoinageLogic(address newLogic) external onlyOwner {
         autoCoinageLogic = newLogic;
     }

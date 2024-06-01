@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {NFTAccessControl} from "../NFTAccessControl.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 /// @title Auction Core
 /// @dev Contains models, variables, and internal methods for the auction.
