@@ -149,6 +149,13 @@ const config: HardhatUserConfig = {
       hardhat: '0x15280a52e79fd4ab35f4b9acbb376dcd72b44fd1',
       local: '0x15280a52e79fd4ab35f4b9acbb376dcd72b44fd1',
     },
+    DAOCommitteeExtend: {
+      default: 22,
+      mainnet: '0x72655449e82211624d5f4d2abb235bb6fe2fe989',
+      goerli: '',
+      hardhat: '',
+      local: '',
+    },
     // tonAdminAddress: {
     //   default: 10,
     //   mainnet: '0xDD9f0cCc044B0781289Ee318e5971b0139602C26',
@@ -171,7 +178,7 @@ const config: HardhatUserConfig = {
     local: {
       url: process.env.ETH_NODE_URI_localhost || "",
       timeout: 800000,
-      deploy: ['deploy-migration'],
+      deploy: ['/00_deploy_dao_committee_extend'],
     },
     mainnet: {
       url: process.env.ETH_NODE_URI_MAINNET || "",

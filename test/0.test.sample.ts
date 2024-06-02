@@ -4,7 +4,7 @@ import { BigNumber, Signer } from 'ethers'
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 
 import {
-    deployedTonStakingV2Fixture,
+    tonStakingV2Fixture,
     lastSeigBlock,
     globalWithdrawalDelay,
     seigManagerInfo,
@@ -15,7 +15,7 @@ import { TonStakingV2Fixtures, JSONFixture } from './shared/fixtureInterfaces'
 import { padLeft } from 'web3-utils'
 import { marshalString, unmarshalString } from './shared/marshal';
 
-//import { readContracts, deployedContracts } from "./common_func"
+import { readContracts, deployedContracts } from "./common_func"
 
 function roundDown(val: BigNumber, decimals: number) {
     return ethers.utils.formatUnits(val, decimals).split(".")[0]
@@ -45,7 +45,7 @@ describe('TON Staking V2 Test', () => {
         networkName = network.name;
         jsonInfo = await jsonFixtures()
         // contractInfos = await readContracts(__dirname+'/../deployments/'+networkName);
-        deployed = await deployedTonStakingV2Fixture()
+        deployed = await tonStakingV2Fixture()
         deployer = deployed.deployer;
         addr1 = deployed.addr1;
         addr2 = deployed.addr2;
