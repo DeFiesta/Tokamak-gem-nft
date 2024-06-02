@@ -15,7 +15,7 @@ import { TonStakingV2Fixtures, JSONFixture } from './shared/fixtureInterfaces'
 import { padLeft } from 'web3-utils'
 import { marshalString, unmarshalString } from './shared/marshal';
 
-import { readContracts, deployedContracts } from "./common_func"
+//import { readContracts, deployedContracts } from "./common_func"
 
 function roundDown(val: BigNumber, decimals: number) {
     return ethers.utils.formatUnits(val, decimals).split(".")[0]

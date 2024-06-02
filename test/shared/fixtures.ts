@@ -5,7 +5,7 @@ import { readContracts, deployedContracts } from "../common_func"
 
 import { Wallet, Signer, Contract, BigNumber } from 'ethers'
 
-import { TonStakingV2Fixtures, TonStakingV2NoSnapshotFixtures, JSONFixture } from './fixtureInterfaces'
+import { TonStakingV2Fixtures, NewTonStakingV2Fixtures2, TonStakingV2NoSnapshotFixtures, JSONFixture } from './fixtureInterfaces'
 
 import { DepositManagerForMigration } from "../../typechain/contracts/stake/managers/DepositManagerForMigration.sol"
 import { DepositManager } from "../../typechain/contracts/stake/managers/DepositManager.sol"
@@ -504,7 +504,7 @@ const getContractAbi = function (contractInfos: any, name: string): string {
   return contractInfos.abis[name].abi;
 }
 
-const getContract = function (contractInfos: any, name: string): string {
+const getContract = function (contractInfos: any, name: string): Contract {
   return new ethers.Contract(
     contractInfos.abis[name].address,
     contractInfos.abis[name].abi,
@@ -873,7 +873,7 @@ export const newTonStakingV2MainnetFixture2 = async function (boolApplyLogic: an
     const seigManagerV2Proxy = (await ethers.getContractAt("SeigManagerProxy", newContractInfo.SeigManagerProxy, deployer)) as SeigManagerProxy;
 
     let imp2 = await seigManagerV2Proxy.implementation()
-    const seigManagerV2Imp = (await (await ethers.getContractFactory("SeigManagerV1_1")).connect(deployer).deploy()) as SeigManager;
+    const seigManagerV2Imp = (await (await ethers.getContractFactory("SeigManagerV1_1")).connect(deployer).deploy()) as unknown as SeigManager;
 
     if (imp2 != seigManagerV2Imp.address) {
       console.log("seigManager upgradeTo")

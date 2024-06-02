@@ -1,42 +1,44 @@
-import { ethers, deployments, getNamedAccounts, network } from 'hardhat'
-import dotenv from 'dotenv'
-dotenv.config()
-import Promise from 'bluebird'
-import f from 'fs'
+import { ethers } from 'ethers'; // Correct import for ethers
+import dotenv from 'dotenv';
+dotenv.config();
+import Bluebird from 'bluebird';
+import fs from 'fs';
 
+const fsp = Bluebird.promisifyAll(fs);
 
-const fs = Promise.promisifyAll(f);
-
-function promisify(fn) {
-  return function promisified(...params) {
-    return new Promise((resolve, reject) => fn(...params.concat([(err, ...args) => err ? reject(err) : resolve( args.length < 2 ? args[0] : args )])))
-  }
+function promisify(fn: Function) {
+  return function promisified(...params: any[]) {
+    return new Bluebird((resolve, reject) =>
+      fn(...params.concat([(err: any, ...args: any[]) => err ? reject(err) : resolve(args.length < 2 ? args[0] : args)]))
+    );
+  };
 }
 
-const readdirAsync = promisify(fs.readdir)
+const readdirAsync = promisify(fsp.readdir) as (path: string) => Bluebird<string[]>;
 
-export const readContracts = async (folder) => {
-  let abis = {}
-  let names = []
-  let i;
+export const readContracts = async (folder: string) => {
+  let abis: { [key: string]: any } = {};
+  let names: string[] = [];
 
-  await readdirAsync(folder).then(filenames => {
-    for(i=0; i< filenames.length; i++){
-      let e = filenames[i]
+  await readdirAsync(folder).then((filenames: string[]) => {
+    filenames.forEach((e: string) => {
       if (e.indexOf(".json") > 0) {
-        names.push(e.substring(0, e.indexOf(".json")))
-        abis[e.substring(0, e.indexOf(".json"))] = require(folder+"/"+e)
+        const name = e.substring(0, e.indexOf(".json"));
+        names.push(name);
+        abis[name] = require(`${folder}/${e}`);
       }
-    }
-  })
-  return  {names, abis}
-}
+    });
+  });
 
-export const deployedContracts = async(names, abis, provider) => {
-    let deployed = {}
-    for (i = 0; i< names.length; i++){
-      let name = names[i];
-      deployed[name] = new ethers.Contract(abis[name].address, abis[name].abi, provider)
-    }
-    return deployed;
-}
+  return { names, abis };
+};
+
+export const deployedContracts = async (names: string[], abis: { [key: string]: any }, provider: any) => {
+  let deployed: { [key: string]: ethers.Contract } = {};
+
+  names.forEach((name: string) => {
+    deployed[name] = new ethers.Contract(abis[name].address, abis[name].abi, provider);
+  });
+
+  return deployed;
+};
