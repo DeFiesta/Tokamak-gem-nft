@@ -67,7 +67,7 @@ contract NFTAuction is NFTMinting, SaleClockAuction {
         // If tkNFT is already on any auction, this will throw
         // because it will be owned by the auction contract.
         require(_ownsNFT(msg.sender, _nftId));
-        require(_isReadyToBreed(tkNFTs[_nftId]));
+        require(_isReadyToforge(tkNFTs[_nftId]));
         _approve(_nftId, address(siringAuction));
         // Siring auction throws if inputs are invalid and clears
         // transfer and sire approval after escrowing the tkNFT.
@@ -75,14 +75,14 @@ contract NFTAuction is NFTMinting, SaleClockAuction {
     }
 
     /// @dev Completes a siring auction by bidding.
-    ///  Immediately breeds the winning matron with the sire on auction.
+    ///  Immediately forges the winning matron with the sire on auction.
     /// @param _sireId - ID of the sire on auction.
     /// @param _matronId - ID of the matron owned by the bidder.
     function bidOnSiringAuction(uint256 _sireId, uint256 _matronId) external payable whenNotPaused {
         // Auction contract checks input sizes
         require(_ownsNFT(msg.sender, _matronId));
-        require(_isReadyToBreed(tkNFTs[_matronId]));
-        require(_canBreedWithViaAuction(_matronId, _sireId));
+        require(_isReadyToforge(tkNFTs[_matronId]));
+        require(_canforgeWithViaAuction(_matronId, _sireId));
 
         // Define the current price of the auction.
         uint256 currentPrice = siringAuction.getCurrentPrice(_sireId);
@@ -90,7 +90,7 @@ contract NFTAuction is NFTMinting, SaleClockAuction {
 
         // Siring auction will throw if the bid fails.
         siringAuction.bid{value: msg.value - autoBirthFee}(_sireId);
-        _breedWith(uint32(_matronId), uint32(_sireId));
+        _forgeWith(uint32(_matronId), uint32(_sireId));
     }
 
     /// @dev Transfers the balance of the sale auction contract

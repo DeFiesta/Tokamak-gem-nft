@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {ClockAuction} from "./auction/ClockAuction.sol";
-import {NFTBreeding} from "./NFTBreeding.sol";
+import {NFTForging} from "./NFTForging.sol";
 import {NFTAccessControl} from "./NFTAccessControl.sol";
 
-contract NFTMinting is NFTBreeding {
+contract NFTMinting is NFTForging {
     uint256 public constant PROMO_CREATION_LIMIT = 5000;
     uint256 public constant GEN0_CREATION_LIMIT = 45000;
 
