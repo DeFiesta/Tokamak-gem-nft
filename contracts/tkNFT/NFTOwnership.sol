@@ -66,7 +66,7 @@ contract NFTOwnership is NFTBase, ERC721 {
     }
 
     /// @dev Checks if a given address currently has transferApproval for a particular TKNFT.
-    /// @param _claimant the address we are confirming kitten is approved for.
+    /// @param _claimant the address we are confirming tknft is approved for.
     /// @param _tokenId TKNFT id, only valid when > 0
     function _approvedFor(address _claimant, uint256 _tokenId) internal view returns (bool) {
         return NFTIndexToApproved[_tokenId] == _claimant;

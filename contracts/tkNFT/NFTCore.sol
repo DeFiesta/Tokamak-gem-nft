@@ -21,7 +21,7 @@ contract NFTCore is NFTAuction {
 
     function tkNFTwithdrawBalance() external onlyCFO {
         uint256 balance = address(this).balance;
-        // Subtract all the currently pregnant kittens we have, plus 1 of margin.
+        // Subtract all the currently pregnant tknfts we have, plus 1 of margin.
         uint256 subtractFees = (pregnantTkNFT + 1) * autoBirthFee;
 
         if (balance > subtractFees) {
