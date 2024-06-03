@@ -25,12 +25,9 @@ interface SeigManagerI {
 
     function uncomittedStakeOf(address layer2, address account) external view returns (uint256);
     function stakeOf(address layer2, address account) external view returns (uint256);
-    function additionalTotBurnAmount(address layer2, address account, uint256 amount)
-        external
-        view
-        returns (uint256 totAmount);
+    function additionalTotBurnAmount(address layer2, uint256 amount) external view returns (uint256 totAmount);
 
-    function onTransfer(address sender, address recipient, uint256 amount) external returns (bool);
+    function onTransfer() external returns (bool);
     function updateSeigniorage() external returns (bool);
     function onDeposit(address layer2, address account, uint256 amount) external returns (bool);
     function onWithdraw(address layer2, address account, uint256 amount) external returns (bool);

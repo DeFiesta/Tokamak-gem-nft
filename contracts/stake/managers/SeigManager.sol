@@ -465,7 +465,7 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
     /**
      * @dev Callback for a token transfer
      */
-    function onTransfer(address sender, address recipient, uint256 amount) external returns (bool) {
+    function onTransfer() external returns (bool) {
         require(
             msg.sender == address(_ton) || msg.sender == address(_wton),
             "SeigManager: only TON or WTON can call onTransfer"
@@ -478,11 +478,7 @@ contract SeigManager is ProxyStorage, AuthControlSeigManager, SeigManagerStorage
         return true;
     }
 
-    function additionalTotBurnAmount(address layer2, address account, uint256 amount)
-        external
-        view
-        returns (uint256 totAmount)
-    {
+    function additionalTotBurnAmount(address layer2, uint256 amount) external view returns (uint256 totAmount) {
         return _additionalTotBurnAmount(layer2, amount);
     }
 
