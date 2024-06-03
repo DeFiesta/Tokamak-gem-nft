@@ -96,7 +96,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
   const daoCommitteeProxy = new ethers.Contract(DAOCommitteeProxy, contractJson.DAOCommitteeProxy.abi, deployerSigner);
   const daoAgendaManager = new ethers.Contract(DAOAgendaManager, contractJson.DAOAgendaManager.abi, deployerSigner);
   const powerTonProxy = new ethers.Contract(powerTonAddress, contractJson.PowerTON.abi, deployerSigner);
-  console.log('DAOCommitteeProxy', DAOCommitteeProxy);
 
   //==========================
   //-- DAOCommittee 로직 업데이트
@@ -107,19 +106,14 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
   const daoCommitteeAdmin = await hre.ethers.getSigner(DaoCommitteeAdminAddress);
   const daoCommitteeAdminSigner = daoCommitteeAdmin as unknown as Signer;
 
-  console.log('DaoCommitteeAdminAddress', DaoCommitteeAdminAddress);
-
   const daoCommitteeExtend = (await (await ethers.getContractFactory("DAOCommitteeExtend")).connect(deployer).deploy()) as unknown as DAOCommitteeExtend;
   await (await daoCommitteeProxy.connect(daoCommitteeAdminSigner).upgradeTo(daoCommitteeExtend.address)).wait();
 
   const daoCommittee = (await ethers.getContractAt("DAOCommitteeExtend", DAOCommitteeProxy, daoCommitteeAdminSigner)) as unknown as DAOCommitteeExtend;
-  console.log('daoCommittee', daoCommittee.address);
 
   let daoImpl = await daoCommitteeProxy.implementation();
-  console.log('daoImpl', daoImpl);
 
   let pauseProxy = await daoCommitteeProxy.pauseProxy();
-  console.log('pauseProxy', pauseProxy);
 
   //-- 기존 디파짓 매니저의 세그매니저를 0으로 설정한다.
   await (await daoCommittee.connect(daoCommitteeAdminSigner).setTargetSeigManager(
@@ -141,7 +135,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
   await (await powerTonProxy.connect(powerTonAdminSigner).upgradeTo(powerTONUpgradeLogic.address)).wait();
 
   const powerTON = (await ethers.getContractAt("PowerTONUpgrade", powerTonProxy.address, daoCommitteeAdminSigner)) as unknown as PowerTONUpgrade;
-  console.log('powerTON', powerTON.address);
 
   //----------- v2 배포
   const depositManagerV2Imp = (await (await ethers.getContractFactory("DepositManager")).connect(deployer).deploy()) as unknown as DepositManager;
@@ -174,8 +167,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
   const coinageFactoryV2 = (await (await ethers.getContractFactory("CoinageFactory")).connect(deployer).deploy()) as unknown as CoinageFactory;
   await (await coinageFactoryV2.connect(deployer).setAutoCoinageLogic(refactorCoinageSnapshot.address)).wait();
 
-  console.log('coinageFactoryV2', coinageFactoryV2.address);
-  console.log('refactorCoinageSnapshot', refactorCoinageSnapshot.address);
 
   //====== set v2 ==================
 
@@ -187,7 +178,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
     DepositManager
   )).wait();
 
-  console.log('depositManagerV2 initialized');
   await (await seigManagerV2.connect(deployer).initialize(
     TONContract.address,
     WTONContract.address,
@@ -197,7 +187,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
     coinageFactoryV2.address,
     lastSeigBlock
   )).wait();
-  console.log('seigManagerV2 initialized');
 
   await (await seigManagerV2.connect(deployer).setData(
     powerTonAddress,
@@ -208,7 +197,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
     seigManagerInfo.adjustCommissionDelay,
     seigManagerInfo.minimumAmount
   )).wait();
-  console.log('seigManagerV2 setData');
 
   await (await layer2RegistryV2.connect(deployer).addMinter(
     daoCommittee.address
@@ -246,7 +234,6 @@ export const tonStakingV2Fixture = async function (): Promise<TonStakingV2Fixtur
     TONContract.address,
     WTONContract.address
   )).wait();
-  console.log('candidateFactory setAddress');
 
   return {
     deployer: deployerSigner,
