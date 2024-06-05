@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {GEMAccessControl} from "./GEMAccessControl.sol";
 import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
-import {SiringClockAuction} from "./auction/SiringClockAuction.sol";
+import {forgingClockAuction} from "./auction/ForgingClockAuction.sol";
 
 contract GEMBase is GEMAccessControl {
     struct tkGEM {
@@ -12,7 +12,7 @@ contract GEMBase is GEMAccessControl {
         uint64 cooldownEndBlock;
         uint32 matronId;
         uint32 sireId;
-        uint32 siringWithId;
+        uint32 forgingWithId;
         uint16 cooldownIndex;
         uint16 generation;
     }
@@ -50,7 +50,7 @@ contract GEMBase is GEMAccessControl {
     mapping(uint256 => address) public GEMIndexToApproved;
     mapping(uint256 => address) public sireAllowedToAddress;
     SaleClockAuction public saleAuction;
-    SiringClockAuction public siringAuction;
+    forgingClockAuction public forgingAuction;
 
     /**
      * EVENTS **
@@ -93,7 +93,7 @@ contract GEMBase is GEMAccessControl {
             cooldownEndBlock: 0,
             matronId: uint32(_matronId),
             sireId: uint32(_sireId),
-            siringWithId: 0,
+            forgingWithId: 0,
             cooldownIndex: cooldownIndex,
             generation: uint16(_generation)
         });

@@ -104,7 +104,7 @@ contract GEMOwnership is GEMBase, ERC721 {
         // misuse. Auction contracts should only take ownership of tkGEMs
         // through the allow + transferFrom flow.
         require(_to != address(saleAuction));
-        require(_to != address(siringAuction));
+        require(_to != address(forgingAuction));
 
         // You can only send your own cat.
         require(_ownsGEM(msg.sender, _tokenId));

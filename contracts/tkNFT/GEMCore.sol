@@ -34,6 +34,6 @@ contract GEMCore is GEMAuction {
     /// @dev Reject all Ether from being sent here, unless it's from one of the
     ///  two auction contracts. (Hopefully, we can prevent user accidents.)
     receive() external payable {
-        require(msg.sender == address(saleAuction) || msg.sender == address(siringAuction));
+        require(msg.sender == address(saleAuction) || msg.sender == address(forgingAuction));
     }
 }
