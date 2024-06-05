@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTAccessControl} from "./GEMAccessControl.sol";
+import {GEMAccessControl} from "./GEMAccessControl.sol";
 import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
 import {SiringClockAuction} from "./auction/SiringClockAuction.sol";
 
-contract NFTBase is NFTAccessControl {
-    struct tkNFT {
+contract GEMBase is GEMAccessControl {
+    struct tkGEM {
         uint256 genes;
         uint64 birthTime;
         uint64 cooldownEndBlock;
@@ -44,10 +44,10 @@ contract NFTBase is NFTAccessControl {
      * STORAGE **
      */
 
-    tkNFT[] tkNFTs;
-    mapping(uint256 => address) public NFTIndexToOwner;
+    tkGEM[] tkGEMs;
+    mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) ownershipTokenCount;
-    mapping(uint256 => address) public NFTIndexToApproved;
+    mapping(uint256 => address) public GEMIndexToApproved;
     mapping(uint256 => address) public sireAllowedToAddress;
     SaleClockAuction public saleAuction;
     SiringClockAuction public siringAuction;
@@ -56,25 +56,25 @@ contract NFTBase is NFTAccessControl {
      * EVENTS **
      */
 
-    event Birth(address owner, uint256 tkNFTId, uint256 matronId, uint256 sireId, uint256 genes);
-    event TransferTKNFT(address from, address to, uint256 tokenId);
+    event Birth(address owner, uint256 tkGEMId, uint256 matronId, uint256 sireId, uint256 genes);
+    event TransferTKGEM(address from, address to, uint256 tokenId);
 
     // ----------------------------------------------------------------------------------------
     // ----------------------------- INTERNAL FUNCTIONS----------------------------------------
     // ----------------------------------------------------------------------------------------
 
-    function _transferNFT(address _from, address _to, uint256 _tokenId) internal virtual {
+    function _transferGEM(address _from, address _to, uint256 _tokenId) internal virtual {
         ownershipTokenCount[_to]++;
-        NFTIndexToOwner[_tokenId] = _to;
+        GEMIndexToOwner[_tokenId] = _to;
         if (_from != address(0)) {
             ownershipTokenCount[_from]--;
             delete sireAllowedToAddress[_tokenId];
-            delete NFTIndexToApproved[_tokenId];
+            delete GEMIndexToApproved[_tokenId];
         }
-        emit TransferTKNFT(_from, _to, _tokenId);
+        emit TransferTKGEM(_from, _to, _tokenId);
     }
 
-    function _createNFT(uint256 _matronId, uint256 _sireId, uint256 _generation, uint256 _genes, address _owner)
+    function _createGEM(uint256 _matronId, uint256 _sireId, uint256 _generation, uint256 _genes, address _owner)
         internal
         returns (uint256)
     {
@@ -87,7 +87,7 @@ contract NFTBase is NFTAccessControl {
             cooldownIndex = 13;
         }
 
-        tkNFT memory _tkNFT = tkNFT({
+        tkGEM memory _tkGEM = tkGEM({
             genes: _genes,
             birthTime: uint64(block.timestamp),
             cooldownEndBlock: 0,
@@ -97,16 +97,16 @@ contract NFTBase is NFTAccessControl {
             cooldownIndex: cooldownIndex,
             generation: uint16(_generation)
         });
-        tkNFTs.push(_tkNFT);
-        uint256 newTKNFTId = tkNFTs.length - 1;
+        tkGEMs.push(_tkGEM);
+        uint256 newTKGEMId = tkGEMs.length - 1;
 
-        require(newTKNFTId == uint256(uint32(newTKNFTId)));
+        require(newTKGEMId == uint256(uint32(newTKGEMId)));
 
-        emit Birth(_owner, newTKNFTId, uint256(_tkNFT.matronId), uint256(_tkNFT.sireId), _tkNFT.genes);
+        emit Birth(_owner, newTKGEMId, uint256(_tkGEM.matronId), uint256(_tkGEM.sireId), _tkGEM.genes);
 
-        _transferNFT(address(0), _owner, newTKNFTId);
+        _transferGEM(address(0), _owner, newTKGEMId);
 
-        return newTKNFTId;
+        return newTKGEMId;
     }
 
     function setSecondsPerBlock(uint256 secs) external onlyCLevel {

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract NFTAccessControl {
-    // This facet controls access control for tkNFT. There are four roles managed here:
+contract GEMAccessControl {
+    // This facet controls access control for tkGEM. There are four roles managed here:
     //
     //     - The CEO: The CEO can reassign other roles and change the addresses of our dependent smart
     //         contracts. It is also the only role that can unpause the smart contract. It is initially
-    //         set to the address that created the smart contract in the NFTCore constructor.
+    //         set to the address that created the smart contract in the GEMCore constructor.
     //
-    //     - The CFO: The CFO can withdraw funds from NFTCore and its auction contracts.
+    //     - The CFO: The CFO can withdraw funds from GEMCore and its auction contracts.
     //
-    //     - The COO: The COO can release gen0 nfts to auction, and mint promo nfts.
+    //     - The COO: The COO can release gen0 GEMs to auction, and mint promo GEMs.
     //
     // It should be noted that these roles are distinct without overlap in their access abilities, the
     // abilities listed for each role above are exhaustive. In particular, while the CEO can assign any

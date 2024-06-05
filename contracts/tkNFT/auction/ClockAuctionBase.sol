@@ -3,16 +3,16 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {NFTAccessControl} from "../GEMAccessControl.sol";
+import {GEMAccessControl} from "../GEMAccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 /// @title Auction Core
 /// @dev Contains models, variables, and internal methods for the auction.
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
-contract ClockAuctionBase is NFTAccessControl {
-    // Represents an auction on an NFT
+contract ClockAuctionBase is GEMAccessControl {
+    // Represents an auction on an GEM
     struct Auction {
-        // Current owner of NFT
+        // Current owner of GEM
         address seller;
         // Price (in wei) at beginning of auction
         uint128 startingPrice;
@@ -25,7 +25,7 @@ contract ClockAuctionBase is NFTAccessControl {
         uint64 startedAt;
     }
 
-    // Reference to contract tracking NFT ownership
+    // Reference to contract tracking GEM ownership
     ERC721 public nonFungibleContract;
 
     // Reference to contract tracking wtonToken
@@ -54,7 +54,7 @@ contract ClockAuctionBase is NFTAccessControl {
         return (nonFungibleContract.ownerOf(_tokenId) == _claimant);
     }
 
-    /// @dev Escrows the NFT, assigning ownership to this contract.
+    /// @dev Escrows the GEM, assigning ownership to this contract.
     /// Throws if the escrow fails.
     /// @param _owner - Current owner address of token to escrow.
     /// @param _tokenId - ID of token whose approval to verify.
@@ -63,9 +63,9 @@ contract ClockAuctionBase is NFTAccessControl {
         nonFungibleContract.safeTransferFrom(_owner, address(this), _tokenId);
     }
 
-    /// @dev Transfers an NFT owned by this contract to another address.
+    /// @dev Transfers an GEM owned by this contract to another address.
     /// Returns true if the transfer succeeds.
-    /// @param _receiver - Address to transfer NFT to.
+    /// @param _receiver - Address to transfer GEM to.
     /// @param _tokenId - ID of token to transfer.
     function _transfer(address _receiver, uint256 _tokenId) internal {
         // it will throw if transfer fails
@@ -134,18 +134,18 @@ contract ClockAuctionBase is NFTAccessControl {
     }
 
     /// @dev Removes an auction from the list of open auctions.
-    /// @param _tokenId - ID of NFT on auction.
+    /// @param _tokenId - ID of GEM on auction.
     function _removeAuction(uint256 _tokenId) internal {
         delete tokenIdToAuction[_tokenId];
     }
 
-    /// @dev Returns true if the NFT is on auction.
+    /// @dev Returns true if the GEM is on auction.
     /// @param _auction - Auction to check.
     function _isOnAuction(Auction storage _auction) internal view returns (bool) {
         return (_auction.startedAt > 0);
     }
 
-    /// @dev Returns current price of an NFT on auction. Broken into two
+    /// @dev Returns current price of an GEM on auction. Broken into two
     ///  functions (this one, that computes the duration from the auction
     ///  structure, and the other that does the price computation) so we
     ///  can easily test that the price computation works correctly.
@@ -200,7 +200,7 @@ contract ClockAuctionBase is NFTAccessControl {
     }
 
     /// @dev Computes owner's cut of a sale.
-    /// @param _price - Sale price of NFT.
+    /// @param _price - Sale price of GEM.
     function _computeCut(uint256 _price) internal view returns (uint256) {
         // NOTE: We don't use SafeMath (or similar) in this function because
         //  all of our entry functions carefully cap the maximum values for

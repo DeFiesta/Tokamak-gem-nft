@@ -4,22 +4,22 @@ pragma solidity ^0.8.20;
 import {ClockAuction} from "./ClockAuction.sol";
 import {SiringClockAuction} from "./SiringClockAuction.sol";
 
-/// @title Clock auction modified for sale of tkNFTs
+/// @title Clock auction modified for sale of tkGEMs
 /// @notice We omit a fallback function to prevent accidental sends to this contract.
 contract SaleClockAuction is ClockAuction, SiringClockAuction {
     // @dev Sanity check that allows us to ensure that we are pointing to the
     //  right auction in our setSaleAuctionAddress() call.
     bool public isSaleClockAuction = true;
 
-    // Tracks last 5 sale price of gen0 tkNFT sales
+    // Tracks last 5 sale price of gen0 tkGEM sales
     uint256 public gen0SaleCount;
     uint256[5] public lastGen0SalePrices;
 
     ClockAuction clockauction;
     SiringClockAuction siringclockauction;
 
-    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
-        SiringClockAuction(_nftAddr, _cut, _wtonTokenAddress)
+    constructor(address _GEMAddr, uint256 _cut, address _wtonTokenAddress)
+        SiringClockAuction(_GEMAddr, _cut, _wtonTokenAddress)
     {}
 
     /// @dev Creates and begins a new auction.
@@ -48,7 +48,7 @@ contract SaleClockAuction is ClockAuction, SiringClockAuction {
         _addAuction(_tokenId, auction);
     }
 
-    /// @dev Updates lastSalePrice if seller is the nft contract
+    /// @dev Updates lastSalePrice if seller is the GEM contract
     /// Otherwise, works the same as default bid method.
     function bid(uint256 _tokenId) external payable override(ClockAuction, SiringClockAuction) {
         // _bid verifies token ID size

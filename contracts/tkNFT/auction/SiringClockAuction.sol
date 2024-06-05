@@ -10,12 +10,12 @@ contract SiringClockAuction is ClockAuction {
     //  right auction in our setSiringAuctionAddress() call.
     bool public isSiringClockAuction = true;
 
-    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
-        ClockAuction(_nftAddr, _cut, _wtonTokenAddress)
+    constructor(address _GEMAddr, uint256 _cut, address _wtonTokenAddress)
+        ClockAuction(_GEMAddr, _cut, _wtonTokenAddress)
     {}
 
     /// @dev Creates and begins a new auction. Since this function is wrapped,
-    /// require sender to be tkNFTCore contract.
+    /// require sender to be tkGEMCore contract.
     /// @param _tokenId - ID of token to auction, sender must be owner.
     /// @param _startingPrice - Price of item (in wei) at beginning of auction.
     /// @param _endingPrice - Price of item (in wei) at end of auction.
@@ -42,15 +42,15 @@ contract SiringClockAuction is ClockAuction {
     }
 
     /// @dev Places a bid for siring. Requires the sender
-    /// is the tkNFTCore contract because all bid methods
-    /// should be wrapped. Also returns the tkNFT to the
+    /// is the tkGEMCore contract because all bid methods
+    /// should be wrapped. Also returns the tkGEM to the
     /// seller rather than the winner.
     function bid(uint256 _tokenId) external payable virtual override(ClockAuction) {
         require(msg.sender == address(nonFungibleContract));
         address seller = tokenIdToAuction[_tokenId].seller;
         // _bid checks that token ID is valid and will throw if bid fails
         _bid(_tokenId, msg.value);
-        // We transfer the tkNFT back to the seller, the winner will get
+        // We transfer the tkGEM back to the seller, the winner will get
         // the offspring
         _transfer(seller, _tokenId);
     }
