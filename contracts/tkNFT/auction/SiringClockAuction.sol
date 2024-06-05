@@ -10,7 +10,9 @@ contract SiringClockAuction is ClockAuction {
     //  right auction in our setSiringAuctionAddress() call.
     bool public isSiringClockAuction = true;
 
-    constructor(address _nftAddr, uint256 _cut) ClockAuction(_nftAddr, _cut) {}
+    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
+        ClockAuction(_nftAddr, _cut, _wtonTokenAddress)
+    {}
 
     /// @dev Creates and begins a new auction. Since this function is wrapped,
     /// require sender to be tkNFTCore contract.

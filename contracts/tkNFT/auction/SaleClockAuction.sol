@@ -18,7 +18,9 @@ contract SaleClockAuction is ClockAuction, SiringClockAuction {
     ClockAuction clockauction;
     SiringClockAuction siringclockauction;
 
-    constructor(address _nftAddr, uint256 _cut) SiringClockAuction(_nftAddr, _cut) {}
+    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
+        SiringClockAuction(_nftAddr, _cut, _wtonTokenAddress)
+    {}
 
     /// @dev Creates and begins a new auction.
     /// @param _tokenId - ID of token to auction, sender must be owner.

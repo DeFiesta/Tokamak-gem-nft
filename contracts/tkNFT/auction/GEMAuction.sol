@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTMinting} from "../NFTMinting.sol";
+import {NFTMinting} from "../GEMMinting.sol";
 import {SaleClockAuction} from "./SaleClockAuction.sol";
 import {SiringClockAuction} from "./SiringClockAuction.sol";
 import {ClockAuctionBase} from "./ClockAuctionBase.sol";
@@ -15,7 +15,9 @@ contract NFTAuction is NFTMinting, SaleClockAuction {
     // `saleAuction` refers to the auction for gen0 and p2p sale of tkNFTs.
     // `siringAuction` refers to the auction for siring rights of tkNFTs.t.
 
-    constructor(address _nftAddr, uint256 _cut) SaleClockAuction(_nftAddr, _cut) {}
+    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
+        SaleClockAuction(_nftAddr, _cut, _wtonTokenAddress)
+    {}
 
     function setSaleAuctionAddress(address _address) external onlyCEO {
         SaleClockAuction candidateContract = SaleClockAuction(_address);

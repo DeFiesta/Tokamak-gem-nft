@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTAccessControl} from "./NFTAccessControl.sol";
+import {NFTAccessControl} from "./GEMAccessControl.sol";
 import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
 import {SiringClockAuction} from "./auction/SiringClockAuction.sol";
 

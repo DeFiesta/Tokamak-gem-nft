@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTAuction} from "./auction/NFTAuction.sol";
+import {NFTAuction} from "./auction/GEMAuction.sol";
 
 contract NFTCore is NFTAuction {
     uint256 public pregnantTkNFT;
 
-    constructor(address _nftAddr, uint256 _cut) NFTAuction(_nftAddr, _cut) {}
+    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress)
+        NFTAuction(_nftAddr, _cut, _wtonTokenAddress)
+    {}
 
     function tkNFTCore() public {
         paused = true;

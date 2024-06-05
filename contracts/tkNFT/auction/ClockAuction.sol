@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ClockAuctionBase} from "./ClockAuctionBase.sol";
-import {NFTAccessControl} from "../NFTAccessControl.sol";
+import {NFTAccessControl} from "../GEMAccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
@@ -29,13 +29,25 @@ contract ClockAuction is ClockAuctionBase {
     /// @param _cut - percent cut the owner takes on each auction, must be
     ///  between 0-10,000.
 
-    constructor(address _nftAddr, uint256 _cut) {
-        require(_cut <= 10000);
+    /// @dev Constructor creates a reference to the NFT ownership contract
+    ///  and verifies the owner cut is in the valid range.
+    /// @param _nftAddr - address of a deployed contract implementing
+    ///  the Nonfungible Interface.
+    /// @param _cut - percent cut the owner takes on each auction, must be
+    ///  between 0-10,000.
+    /// @param _wtonTokenAddress - address of the deployed WTON token contract.
+    constructor(address _nftAddr, uint256 _cut, address _wtonTokenAddress) ClockAuctionBase(_wtonTokenAddress) {
+        require(_cut <= 10000, "Cut must be between 0 and 10000");
         ownerCut = _cut;
 
         ERC721 candidateContract = ERC721(_nftAddr);
-        require(candidateContract.supportsInterface(InterfaceSignature_ERC721));
+        require(
+            candidateContract.supportsInterface(InterfaceSignature_ERC721),
+            "NFT contract does not support ERC721 interface"
+        );
         nonFungibleContract = candidateContract;
+
+        owner = msg.sender;
     }
 
     /// @dev Remove all Ether from the contract, which is the owner's cuts

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {NFTBase} from "./NFTBase.sol";
+import {NFTBase} from "./GEMBase.sol";
 
 /// @title The external contract that is responsible for generating metadata for the TKNFTs,
 ///  it has one function that will return the data as bytes.
@@ -40,7 +40,7 @@ contract NFTOwnership is NFTBase, ERC721 {
 
     /// @notice Introspection interface as per ERC-165 (https://github.com/ethereum/EIPs/issues/165).
     ///  Returns true for any standardized interfaces implemented by this contract. We implement
-    ///  ERC-165 (obviously!) and ERC-721.
+    ///  ERC-165 and ERC-721.
     function supportsInterfaceNFT(bytes4 _interfaceID) external pure returns (bool) {
         // DEBUG ONLY
         //require((InterfaceSignature_ERC165 == 0x01ffc9a7) && (InterfaceSignature_ERC721 == 0x9a20483d));
@@ -50,7 +50,7 @@ contract NFTOwnership is NFTBase, ERC721 {
 
     /// @dev Set the address of the sibling contract that tracks metadata.
     ///  CEO only.
-    function setMetadataAddress(address _contractAddress) public onlyCEO {
+    function setMetadataAddress(address _contractAddress) external onlyCEO {
         erc721Metadata = ERC721Metadata(_contractAddress);
     }
 

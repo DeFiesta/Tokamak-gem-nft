@@ -2,7 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {NFTAccessControl} from "../NFTAccessControl.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {NFTAccessControl} from "../GEMAccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 /// @title Auction Core
@@ -27,6 +28,9 @@ contract ClockAuctionBase is NFTAccessControl {
     // Reference to contract tracking NFT ownership
     ERC721 public nonFungibleContract;
 
+    // Reference to contract tracking wtonToken
+    IERC20 public wtonToken;
+
     // Cut owner takes on each auction, measured in basis points (1/100 of a percent).
     // Values 0-10,000 map to 0%-100%
     uint256 public ownerCut;
@@ -38,9 +42,14 @@ contract ClockAuctionBase is NFTAccessControl {
     event AuctionSuccessful(uint256 tokenId, uint256 totalPrice, address winner);
     event AuctionCancelled(uint256 tokenId);
 
+    constructor(address _wtonTokenAddress) {
+        wtonToken = IERC20(_wtonTokenAddress);
+    }
+
     /// @dev Returns true if the claimant owns the token.
     /// @param _claimant - Address claiming to own the token.
     /// @param _tokenId - ID of token whose ownership to verify.
+
     function _owns(address _claimant, uint256 _tokenId) public view returns (bool) {
         return (nonFungibleContract.ownerOf(_tokenId) == _claimant);
     }
@@ -92,58 +101,33 @@ contract ClockAuctionBase is NFTAccessControl {
     /// @dev Computes the price and transfers winnings.
     /// Does NOT transfer ownership of token.
     function _bid(uint256 _tokenId, uint256 _bidAmount) internal returns (uint256) {
-        // Get a reference to the auction struct
         Auction storage auction = tokenIdToAuction[_tokenId];
 
-        // Explicitly check that this auction is currently live.
-        // (Because of how Ethereum mappings work, we can't just count
-        // on the lookup above failing. An invalid _tokenId will just
-        // return an auction object that is all zeros.)
-        require(_isOnAuction(auction));
-
-        // Check that the bid is greater than or equal to the current price
+        require(_isOnAuction(auction), "Auction is not active");
         uint256 price = _currentPrice(auction);
-        require(_bidAmount >= price);
-
-        // Grab a reference to the seller before the auction struct
-        // gets deleted.
+        require(_bidAmount >= price, "Bid amount is too low");
         address seller = auction.seller;
-
-        // The bid is good! Remove the auction before sending the fees
-        // to the sender so we can't have a reentrancy attack.
         _removeAuction(_tokenId);
 
         // Transfer proceeds to seller (if there are any!)
         if (price > 0) {
-            // Calculate the auctioneer's cut.
-            // (NOTE: _computeCut() is guaranteed to return a
-            // value <= price, so this subtraction can't go negative.)
             uint256 auctioneerCut = _computeCut(price);
             uint256 sellerProceeds = price - auctioneerCut;
 
-            // NOTE: Doing a transfer() in the middle of a complex
-            // method like this is generally discouraged because of
-            // reentrancy attacks and DoS attacks if the seller is
-            // a contract with an invalid fallback function. We explicitly
-            // guard against reentrancy attacks by removing the auction
-            // before calling transfer(), and the only thing the seller
-            // can DoS is the sale of their own asset! (And if it's an
-            // accident, they can call cancelAuction(). )
-            payable(seller).transfer(sellerProceeds);
+            // Check allowance and transfer WTON tokens to the seller
+            uint256 allowance = wtonToken.allowance(msg.sender, address(this));
+            require(allowance >= _bidAmount, "Allowance not sufficient");
+
+            require(wtonToken.transferFrom(msg.sender, seller, sellerProceeds), "Transfer to seller failed");
         }
 
         // Calculate any excess funds included with the bid. If the excess
         // is anything worth worrying about, transfer it back to bidder.
-        // NOTE: We checked above that the bid amount is greater than or
-        // equal to the price so this cannot underflow.
         uint256 bidExcess = _bidAmount - price;
 
-        // Return the funds. Similar to the previous transfer, this is
-        // not susceptible to a re-entry attack because the auction is
-        // removed before any transfers occur.
-        payable(msg.sender).transfer(bidExcess);
+        // Return the excess funds to the bidder
+        require(wtonToken.transferFrom(msg.sender, msg.sender, bidExcess), "Transfer of excess funds failed");
 
-        // Tell the world!
         emit AuctionSuccessful(_tokenId, price, msg.sender);
 
         return price;

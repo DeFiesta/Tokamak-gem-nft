@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {NFTOwnership} from "./NFTOwnership.sol";
-import {NFTBase} from "./NFTBase.sol";
+import {NFTOwnership} from "./GEMOwnership.sol";
+import {NFTBase} from "./GEMBase.sol";
 
 interface GeneScienceInterface {
     function isGeneScience() external pure returns (bool);
@@ -27,7 +27,7 @@ contract NFTForging is NFTOwnership {
     ///  genetic combination algorithm.
     GeneScienceInterface public geneScience;
 
-    /// @dev The Pregnant event is fired when two cats successfully forge and the pregnancy
+    /// @dev The Pregnant event is fired when two nfts successfully forge and the pregnancy
     ///  timer begins for the matron.
     event Pregnant(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
 
@@ -48,7 +48,7 @@ contract NFTForging is NFTOwnership {
     ///  no pending pregnancy.
     function _isReadyToforge(tkNFT memory _nft) internal view returns (bool) {
         // In addition to checking the cooldownEndBlock, we also need to check to see if
-        // the cat has a pending birth; there can be some period of time between the end
+        // the nft has a pending birth; there can be some period of time between the end
         // of the pregnacy timer and the birth event.
         return (_nft.siringWithId == 0) && (_nft.cooldownEndBlock <= uint64(block.number));
     }
@@ -65,7 +65,7 @@ contract NFTForging is NFTOwnership {
         return (matronOwner == sireOwner || sireAllowedToAddress[_sireId] == matronOwner);
     }
 
-    /// @dev Set the cooldownEndTime for the given TkNFT, based on its current cooldownIndex.
+    /// @dev set the cooldownEndTime for the given TkNFT, based on its current cooldownIndex.
     ///  Also increments the cooldownIndex (unless it has hit the cap).
     /// @param _nfts A reference to the TkNFT in storage which needs its timer started.
     function _triggerCooldown(tkNFT storage _nfts) internal {
@@ -74,7 +74,7 @@ contract NFTForging is NFTOwnership {
 
         // Increment the  Forging count, clamping it at 13, which is the length of the
         // cooldowns array. We could check the array size dynamically, but hard-coding
-        // this as a constant saves gas. Yay, Solidity!
+        // this as a constant saves gas.
         if (_nfts.cooldownIndex < 13) {
             _nfts.cooldownIndex += 1;
         }
