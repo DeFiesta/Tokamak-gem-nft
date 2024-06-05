@@ -24,15 +24,14 @@ contract GEMCore is GEMAuction {
     function tkGEMwithdrawBalance() external onlyCFO {
         uint256 balance = address(this).balance;
         // Subtract all the currently Forging tkGEMs we have, plus 1 of margin.
-        uint256 subtractFees = (forgedTkGEMs + 1) * autoForgeFee;
+        //uint256 subtractFees = (forgedTkGEMs + 1) * autoForgeFee;
 
-        if (balance > subtractFees) {
-            payable(cfoAddress).transfer(balance - subtractFees);
-        }
+        //if (balance > subtractFees) {
+        payable(cfoAddress).transfer(balance);
+        //
     }
 
-    /// @dev Reject all Ether from being sent here, unless it's from one of the
-    ///  two auction contracts. (Hopefully, we can prevent user accidents.)
+    /// @dev Reject all Ether from being sent here, unless it's from the auction contracts.
     receive() external payable {
         require(msg.sender == address(saleAuction));
     }

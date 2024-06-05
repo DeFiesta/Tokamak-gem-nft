@@ -6,11 +6,10 @@ import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
 
 contract GEMBase is GEMAccessControl {
     struct tkGEM {
-        uint256 genes;
-        uint64 birthTime;
+        uint256 shape;
+        uint64 forgeTime; // timestamp of GEM creation
         uint64 cooldownEndBlock;
-        uint32 matronId;
-        uint32 sireId;
+        uint32 GemId;
         uint32 forgingWithId;
         uint16 cooldownIndex;
         uint16 generation;
@@ -47,14 +46,14 @@ contract GEMBase is GEMAccessControl {
     mapping(uint256 => address) public GEMIndexToOwner;
     mapping(address => uint256) ownershipTokenCount;
     mapping(uint256 => address) public GEMIndexToApproved;
-    mapping(uint256 => address) public sireAllowedToAddress;
+    mapping(uint256 => address) public gemAllowedToAddress;
     SaleClockAuction public saleAuction;
 
     /**
      * EVENTS **
      */
 
-    event Birth(address owner, uint256 tkGEMId, uint256 matronId, uint256 sireId, uint256 genes);
+    event Forged(address owner, uint256 tkGEMId, uint256 shape);
     event TransferTKGEM(address from, address to, uint256 tokenId);
 
     // ----------------------------------------------------------------------------------------
@@ -66,44 +65,38 @@ contract GEMBase is GEMAccessControl {
         GEMIndexToOwner[_tokenId] = _to;
         if (_from != address(0)) {
             ownershipTokenCount[_from]--;
-            delete sireAllowedToAddress[_tokenId];
+            delete gemAllowedToAddress[_tokenId];
             delete GEMIndexToApproved[_tokenId];
         }
         emit TransferTKGEM(_from, _to, _tokenId);
     }
 
-    function _createGEM(uint256 _matronId, uint256 _sireId, uint256 _generation, uint256 _genes, address _owner)
+    function _createGEM(uint256 _firstGem, uint256 _secondGem, uint256 _generation, uint256 _shape, address _owner)
         internal
         returns (uint256)
     {
-        require(_matronId == uint256(uint32(_matronId)));
-        require(_sireId == uint256(uint32(_sireId)));
+        require(_firstGem == uint256(uint32(_firstGem)));
+        require(_secondGem == uint256(uint32(_secondGem)));
         require(_generation == uint256(uint16(_generation)));
-
         uint16 cooldownIndex = uint16(_generation / 2);
         if (cooldownIndex > 13) {
             cooldownIndex = 13;
         }
-
         tkGEM memory _tkGEM = tkGEM({
-            genes: _genes,
-            birthTime: uint64(block.timestamp),
+            shape: _shape,
+            forgeTime: uint64(block.timestamp),
             cooldownEndBlock: 0,
-            matronId: uint32(_matronId),
-            sireId: uint32(_sireId),
+            GemId: 0,
             forgingWithId: 0,
             cooldownIndex: cooldownIndex,
             generation: uint16(_generation)
         });
         tkGEMs.push(_tkGEM);
         uint256 newTKGEMId = tkGEMs.length - 1;
-
         require(newTKGEMId == uint256(uint32(newTKGEMId)));
-
-        emit Birth(_owner, newTKGEMId, uint256(_tkGEM.matronId), uint256(_tkGEM.sireId), _tkGEM.genes);
-
+        _tkGEM.GemId = uint32(newTKGEMId);
+        emit Forged(_owner, newTKGEMId, _tkGEM.shape);
         _transferGEM(address(0), _owner, newTKGEMId);
-
         return newTKGEMId;
     }
 
