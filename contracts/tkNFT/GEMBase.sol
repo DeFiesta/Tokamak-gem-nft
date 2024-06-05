@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import {GEMAccessControl} from "./GEMAccessControl.sol";
 import {SaleClockAuction} from "./auction/SaleClockAuction.sol";
-import {forgingClockAuction} from "./auction/ForgingClockAuction.sol";
 
 contract GEMBase is GEMAccessControl {
     struct tkGEM {
@@ -50,7 +49,6 @@ contract GEMBase is GEMAccessControl {
     mapping(uint256 => address) public GEMIndexToApproved;
     mapping(uint256 => address) public sireAllowedToAddress;
     SaleClockAuction public saleAuction;
-    forgingClockAuction public forgingAuction;
 
     /**
      * EVENTS **

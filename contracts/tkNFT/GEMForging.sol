@@ -8,9 +8,9 @@ interface GeneScienceInterface {
     function isGeneScience() external pure returns (bool);
 
     /// @dev given genes of tkGEM 1 & 2, return a genetic combination - may have a random factor
-    /// @param genes1 genes of mom
-    /// @param genes2 genes of sire
-    /// @return the genes that are supposed to be passed down the child
+    /// @param genes1 genes of GEM1
+    /// @param genes2 genes of GEM2
+    /// @return the genes that are supposed to be passed down the forged GEM
     function mixGenes(uint256 genes1, uint256 genes2, uint256 targetBlock) external returns (uint256);
 }
 
@@ -18,18 +18,18 @@ contract GEMForging is GEMOwnership {
     /// @notice The minimum payment required to use forgeWithAuto(). This fee goes towards
     ///  the gas cost paid by whatever calls forge(), and can be dynamically updated by
     ///  the COO role as the gas price changes.
-    uint256 public autoBirthFee = 2 * 1e15; //finney;
+    uint256 public autoForgeFee = 2 * 1e15; //finney;
 
-    // Keeps track of number of pregnant tkGEMs.
-    uint256 public pregnantTkGEMs;
+    // Keeps track of number of Forging tkGEMs.
+    uint256 public forgingTkGEMs;
 
-    /// @dev The address of the sibling contract that is used to implement the sooper-sekret
+    /// @dev The address of the sibling contract that is used to implement the
     ///  genetic combination algorithm.
     GeneScienceInterface public geneScience;
 
-    /// @dev The Pregnant event is fired when two GEMs successfully forge and the pregnancy
+    /// @dev The Forging event is fired when two GEMs successfully forge and the forging
     ///  timer begins for the matron.
-    event Pregnant(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
+    event Forging(address owner, uint256 matronId, uint256 sireId, uint256 cooldownEndBlock);
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.
     /// @param _address An address of a GeneScience contract instance to be used from this point forward.
@@ -45,7 +45,7 @@ contract GEMForging is GEMOwnership {
 
     /// @dev Checks that a given tkGEM is able to forge. Requires that the
     ///  current cooldown is finished (for sires) and also checks that there is
-    ///  no pending pregnancy.
+    ///  no pending forging.
     function _isReadyToforge(tkGEM memory _GEM) internal view returns (bool) {
         // In addition to checking the cooldownEndBlock, we also need to check to see if
         // the GEM has a pending birth; there can be some period of time between the end
@@ -93,16 +93,16 @@ contract GEMForging is GEMOwnership {
     ///  be called by the COO address. (This fee is used to offset the gas cost incurred
     ///  by the autobirth daemon).
     function setAutoBirthFee(uint256 val) external onlyCOO {
-        autoBirthFee = val;
+        autoForgeFee = val;
     }
 
-    /// @dev Checks to see if a given TkGEM is pregnant and (if so) if the gestation
+    /// @dev Checks to see if a given TkGEM is Forging and (if so) if the gestation
     ///  period has passed.
     function _isReadyToForge(tkGEM memory _matron) private view returns (bool) {
         return (_matron.forgingWithId != 0) && (_matron.cooldownEndBlock <= uint64(block.number));
     }
 
-    /// @notice Checks that a given tkGEM is able to forge (i.e. it is not pregnant or
+    /// @notice Checks that a given tkGEM is able to forge (i.e. it is not Forging or
     ///  in the middle of a forging cooldown).
     /// @param _GEMId reference the id of the tkGEM, any user can inquire about it
     function isReadyToforge(uint256 _GEMId) public view returns (bool) {
@@ -111,11 +111,11 @@ contract GEMForging is GEMOwnership {
         return _isReadyToforge(GEM);
     }
 
-    /// @dev Checks whether a TkGEM is currently pregnant.
+    /// @dev Checks whether a TkGEM is currently Forging.
     /// @param _GEMId reference the id of the tkGEM, any user can inquire about it
-    function isPregnant(uint256 _GEMId) public view returns (bool) {
+    function isForging(uint256 _GEMId) public view returns (bool) {
         require(_GEMId > 0);
-        // A TkGEM is pregnant if and only if this field is set
+        // A TkGEM is Forging if and only if this field is set
         return tkGEMs[_GEMId].forgingWithId != 0;
     }
 
@@ -125,7 +125,7 @@ contract GEMForging is GEMOwnership {
     /// @param _matronId The matron's ID.
     /// @param _sire A reference to the TkGEM struct of the potential sire.
     /// @param _sireId The sire's ID
-    function _isValidMatingPair(tkGEM storage _matron, uint256 _matronId, tkGEM storage _sire, uint256 _sireId)
+    function _isValidForgingPair(tkGEM storage _matron, uint256 _matronId, tkGEM storage _sire, uint256 _sireId)
         private
         view
         returns (bool)
@@ -166,13 +166,13 @@ contract GEMForging is GEMOwnership {
     function _canforgeWithViaAuction(uint256 _matronId, uint256 _sireId) internal view returns (bool) {
         tkGEM storage matron = tkGEMs[_matronId];
         tkGEM storage sire = tkGEMs[_sireId];
-        return _isValidMatingPair(matron, _matronId, sire, _sireId);
+        return _isValidForgingPair(matron, _matronId, sire, _sireId);
     }
 
     /// @notice Checks to see if two cats can forge together, including checks for
     ///  ownership and forging approvals. Does NOT check that both cats are ready for
     ///   Forging (i.e. forgeWith could still fail until the cooldowns are finished).
-    ///  TODO: Shouldn't this check pregnancy and cooldowns?!?
+    ///  TODO: Shouldn't this check forging and cooldowns?!?
     /// @param _matronId The ID of the proposed matron.
     /// @param _sireId The ID of the proposed sire.
     function canforgeWith(uint256 _matronId, uint256 _sireId) external view returns (bool) {
@@ -180,7 +180,7 @@ contract GEMForging is GEMOwnership {
         require(_sireId > 0);
         tkGEM storage matron = tkGEMs[_matronId];
         tkGEM storage sire = tkGEMs[_sireId];
-        return _isValidMatingPair(matron, _matronId, sire, _sireId) && _isforgingPermitted(_sireId, _matronId);
+        return _isValidForgingPair(matron, _matronId, sire, _sireId) && _isforgingPermitted(_sireId, _matronId);
     }
 
     /// @dev Internal utility function to initiate  Forging, assumes that all  Forging
@@ -190,7 +190,7 @@ contract GEMForging is GEMOwnership {
         tkGEM storage sire = tkGEMs[_sireId];
         tkGEM storage matron = tkGEMs[_matronId];
 
-        // Mark the matron as pregnant, keeping track of who the sire is.
+        // Mark the matron as Forging, keeping track of who the sire is.
         matron.forgingWithId = uint32(_sireId);
 
         // Trigger the cooldown for both parents.
@@ -202,21 +202,21 @@ contract GEMForging is GEMOwnership {
         delete sireAllowedToAddress[_matronId];
         delete sireAllowedToAddress[_sireId];
 
-        // Every time a TkGEM gets pregnant, counter is incremented.
-        pregnantTkGEMs++;
+        // Every time a TkGEM gets Forging, counter is incremented.
+        forgingTkGEMs++;
 
-        // Emit the pregnancy event.
-        emit Pregnant(GEMIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
+        // Emit the forging event.
+        emit Forging(GEMIndexToOwner[_matronId], _matronId, _sireId, matron.cooldownEndBlock);
     }
 
     /// @notice forge a TkGEM you own (as matron) with a sire that you own, or for which you
-    ///  have previously been given forging approval. Will either make your cat pregnant, or will
+    ///  have previously been given forging approval. Will either make your cat Forging, or will
     ///  fail entirely. Requires a pre-payment of the fee given out to the first caller of forge()
-    /// @param _matronId The ID of the TkGEM acting as matron (will end up pregnant if successful)
+    /// @param _matronId The ID of the TkGEM acting as matron (will end up Forging if successful)
     /// @param _sireId The ID of the TkGEM acting as sire (will begin its forging cooldown if successful)
     function forgeWithAuto(uint256 _matronId, uint256 _sireId) external payable whenNotPaused {
         // Checks for payment.
-        require(msg.value >= autoBirthFee);
+        require(msg.value >= autoForgeFee);
 
         // Caller must own the matron.
         require(_ownsGEM(msg.sender, _matronId));
@@ -240,26 +240,26 @@ contract GEMForging is GEMOwnership {
         // Grab a reference to the potential matron
         tkGEM storage matron = tkGEMs[_matronId];
 
-        // Make sure matron isn't pregnant, or in the middle of a forging cooldown
+        // Make sure matron isn't Forging, or in the middle of a forging cooldown
         require(_isReadyToforge(matron));
 
         // Grab a reference to the potential sire
         tkGEM storage sire = tkGEMs[_sireId];
 
-        // Make sure sire isn't pregnant, or in the middle of a forging cooldown
+        // Make sure sire isn't Forging, or in the middle of a forging cooldown
         require(_isReadyToforge(sire));
 
         // Test that these cats are a valid mating pair.
-        require(_isValidMatingPair(matron, _matronId, sire, _sireId));
+        require(_isValidForgingPair(matron, _matronId, sire, _sireId));
 
-        // All checks passed, TkGEM gets pregnant!
+        // All checks passed, TkGEM gets Forging!
         _forgeWith(_matronId, _sireId);
     }
 
-    /// @notice Have a pregnant TkGEM give birth!
+    /// @notice Have a Forging TkGEM give birth!
     /// @param _matronId A TkGEM ready to give birth.
     /// @return The ID of the new tkGEM.
-    /// @dev Looks at a given TkGEM and, if pregnant and if the gestation period has passed,
+    /// @dev Looks at a given TkGEM and, if Forging and if the gestation period has passed,
     ///  combines the genes of the two parents to create a new tkGEM. The new TkGEM is assigned
     ///  to the current owner of the matron. Upon successful completion, both the matron and the
     ///  new tkGEM will be ready to forge again. Note that anyone can call this function (if they
@@ -271,7 +271,7 @@ contract GEMForging is GEMOwnership {
         // Check that the matron is a valid cat.
         require(matron.birthTime != 0);
 
-        // Check that the matron is pregnant, and that its time has come!
+        // Check that the matron is Forging, and that its time has come!
         require(_isReadyToForge(matron));
 
         // Grab a reference to the sire in storage.
@@ -292,14 +292,14 @@ contract GEMForging is GEMOwnership {
         uint256 GEMId = _createGEM(_matronId, matron.forgingWithId, parentGen + 1, childGenes, owner);
 
         // Clear the reference to sire from the matron (REQUIRED! Having forgingWithId
-        // set is what marks a matron as being pregnant.)
+        // set is what marks a matron as being Forging.)
         delete matron.forgingWithId;
 
         // Every time a TkGEM gives birth counter is decremented.
-        pregnantTkGEMs--;
+        forgingTkGEMs--;
 
         // Send the balance fee to the person who made birth happen.
-        payable(msg.sender).transfer(autoBirthFee);
+        payable(msg.sender).transfer(autoForgeFee);
 
         // return the new tkGEM's ID
         return GEMId;
