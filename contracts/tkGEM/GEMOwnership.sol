@@ -14,11 +14,11 @@ contract ERC721Metadata {
         returns (bytes32[4] memory buffer, uint256 count)
     {
         if (_tokenId == 1) {
-            buffer[0] = "Hello World! :D";
+            buffer[0] = "BASIC GEM 1";
             count = 15;
         } else if (_tokenId == 2) {
-            buffer[0] = "I would definitely choose a medi";
-            buffer[1] = "um length string.";
+            buffer[0] = "BASIC GEM 1";
+            buffer[1] = "DESCRIPTION";
             count = 49;
         } else if (_tokenId == 3) {
             buffer[0] = "Lorem ipsum dolor sit amet, mi e";
@@ -88,8 +88,7 @@ contract GEMOwnership is GEMBase, ERC721 {
         return ownershipTokenCount[_owner];
     }
 
-    /// @notice Transfers a TKGEMs to another address. If transferring to a smart
-    ///  contract be VERY CAREFUL to ensure that it is aware of ERC-721 or your TKGEM may be lost forever.
+    /// @notice Transfers a TKGEMs to another address.
     /// @param _to The address of the recipient, can be a user or contract.
     /// @param _tokenId The ID of the TKGEM to transfer.
     /// @dev Required for ERC-721 compliance.
@@ -98,18 +97,18 @@ contract GEMOwnership is GEMBase, ERC721 {
         require(_to != address(0));
         // Disallow transfers to this contract to prevent accidental misuse.
         // The contract should never own any tkGEMs (except very briefly
-        // after a gen0 cat is created and before it goes on auction).
+        // after a gen0 gem is created and before it goes on auction).
         require(_to != address(this));
         // Disallow transfers to the auction contracts to prevent accidental
         // misuse. Auction contracts should only take ownership of tkGEMs
         // through the allow + transferFrom flow.
         require(_to != address(saleAuction));
 
-        // You can only send your own cat.
+        // You can only send your own gem.
         require(_ownsGEM(msg.sender, _tokenId));
 
         // Reassign ownership, clear pending approvals, emit Transfer event.
-        _transferGEM(msg.sender, _to, _tokenId);
+        _transfer(msg.sender, _to, _tokenId);
     }
 
     /// @notice Grant another address the right to transfer a specific tkGEM via
@@ -141,14 +140,14 @@ contract GEMOwnership is GEMBase, ERC721 {
         require(_to != address(0));
         // Disallow transfers to this contract to prevent accidental misuse.
         // The contract should never own any tkGEMs (except very briefly
-        // after a gen0 cat is created and before it goes on auction).
+        // after a gen0 gem is created and before it goes on auction).
         require(_to != address(this));
         // Check for approval and valid ownership
         require(_approvedFor(msg.sender, _tokenId));
         require(_ownsGEM(_from, _tokenId));
 
         // Reassign ownership (also clears pending approvals and emits Transfer event).
-        _transferGEM(_from, _to, _tokenId);
+        _transfer(_from, _to, _tokenId);
     }
 
     /// @notice Returns the total number of tkGEMs currently in existence.
@@ -181,13 +180,13 @@ contract GEMOwnership is GEMBase, ERC721 {
             uint256 totalCats = totalSupply();
             uint256 resultIndex = 0;
 
-            // We count on the fact that all cats have IDs starting at 1 and increasing
+            // We count on the fact that all gems have IDs starting at 1 and increasing
             // sequentially up to the totalCat count.
-            uint256 catId;
+            uint256 gemId;
 
-            for (catId = 1; catId <= totalCats; catId++) {
-                if (GEMIndexToOwner[catId] == _owner) {
-                    result[resultIndex] = catId;
+            for (gemId = 1; gemId <= totalCats; gemId++) {
+                if (GEMIndexToOwner[gemId] == _owner) {
+                    result[resultIndex] = gemId;
                     resultIndex++;
                 }
             }
