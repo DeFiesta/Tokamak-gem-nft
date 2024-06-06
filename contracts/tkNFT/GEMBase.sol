@@ -71,12 +71,7 @@ contract GEMBase is GEMAccessControl {
         emit TransferTKGEM(_from, _to, _tokenId);
     }
 
-    function _createGEM(uint256 _firstGem, uint256 _secondGem, uint256 _generation, uint256 _shape, address _owner)
-        internal
-        returns (uint256)
-    {
-        require(_firstGem == uint256(uint32(_firstGem)));
-        require(_secondGem == uint256(uint32(_secondGem)));
+    function _createGEM(uint256 _generation, uint256 _shape, address _owner) internal returns (uint256) {
         require(_generation == uint256(uint16(_generation)));
         uint16 cooldownIndex = uint16(_generation / 2);
         if (cooldownIndex > 13) {

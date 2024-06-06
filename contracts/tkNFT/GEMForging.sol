@@ -168,7 +168,7 @@ contract GEMForging is GEMOwnership {
 
         // Make the new tkGEM!
         address owner = GEMIndexToOwner[_FirstGemId];
-        uint256 GEMId = _createGEM(_FirstGemId, _SecondGemId, parentGen + 1, childshape, owner);
+        uint256 GEMId = _createGEM(parentGen + 1, childshape, owner);
 
         // Every time a TkGEM is forged, counter is decremented.
         forgingTkGEMs--;
