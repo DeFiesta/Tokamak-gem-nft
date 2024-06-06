@@ -30,9 +30,4 @@ contract GEMCore is GEMAuction {
         payable(cfoAddress).transfer(balance);
         //
     }
-
-    /// @dev Reject all Ether from being sent here, unless it's from the auction contracts.
-    receive() external payable {
-        require(msg.sender == address(saleAuction));
-    }
 }

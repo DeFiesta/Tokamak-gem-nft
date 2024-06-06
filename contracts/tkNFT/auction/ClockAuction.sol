@@ -12,16 +12,6 @@ contract ClockAuction is ClockAuctionBase {
     ///  Ref: https://github.com/ethereum/EIPs/issues/721
     bytes4 constant InterfaceSignature_ERC721 = bytes4(0x9a20483d);
 
-    address owner;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        // Underscore is a special character only used inside
-        // a function modifier and it tells Solidity to
-        // execute the rest of the code.
-        _;
-    }
-
     /// @dev Constructor creates a reference to the GEM ownership contract
     ///  and verifies the owner cut is in the valid range.
     /// @param _GEMAddr - address of a deployed contract implementing
@@ -46,15 +36,13 @@ contract ClockAuction is ClockAuctionBase {
             "GEM contract does not support ERC721 interface"
         );
         nonFungibleContract = candidateContract;
-
-        owner = msg.sender;
     }
 
     /// @dev Remove all Ether from the contract, which is the owner's cuts
     ///  as well as any Ether sent directly to the contract address.
     ///  Always transfers to the GEM contract, but can be called either by
     ///  the owner or the GEM contract.
-    function withdrawBalance() external onlyOwner returns (bool res) {
+    function withdrawBalance() external onlyCFO returns (bool res) {
         address GEMAddress = address(nonFungibleContract);
 
         require(msg.sender == GEMAddress);
@@ -115,7 +103,7 @@ contract ClockAuction is ClockAuctionBase {
     ///  Only the owner may do this, and GEMs are returned to
     ///  the seller. This should only be used in emergencies.
     /// @param _tokenId - ID of the GEM on auction to cancel.
-    function cancelAuctionWhenPaused(uint256 _tokenId) external whenPaused onlyOwner {
+    function cancelAuctionWhenPaused(uint256 _tokenId) external whenPaused onlyCFO {
         Auction storage auction = tokenIdToAuction[_tokenId];
         require(_isOnAuction(auction));
         _cancelAuction(_tokenId, auction.seller);
