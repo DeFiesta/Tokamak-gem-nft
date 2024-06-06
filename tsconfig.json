@@ -9,8 +9,12 @@
         "forceConsistentCasingInFileNames": true,
         "types": [
             "mocha",
-            "node"
-        ]
+            "node",
+            "chai",
+            "hardhat"
+        ],
+        "outDir": "./dist",
+        "moduleResolution": "node"
     },
     "include": [
         "./scripts",

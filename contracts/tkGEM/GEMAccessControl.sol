@@ -48,6 +48,10 @@ contract GEMAccessControl {
         _;
     }
 
+    constructor() {
+        ceoAddress = msg.sender;
+    }
+
     function setCEO(address _newCEO) external onlyCEO {
         require(_newCEO != address(0));
         ceoAddress = _newCEO;
