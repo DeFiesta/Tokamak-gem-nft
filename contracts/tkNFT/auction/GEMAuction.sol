@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {GEMMinting} from "../GEMMinting.sol";
 import {SaleClockAuction} from "./SaleClockAuction.sol";
 import {ClockAuctionBase} from "./ClockAuctionBase.sol";
+import {GEMForging} from "../GEMForging.sol";
 
 /// @title Handles creating auctions for sale and forging of tkGEMs.
 ///  This wrapper of ReverseAuction exists only so that users can create
 ///  auctions with only one transaction.
-contract GEMAuction is GEMMinting, SaleClockAuction {
+contract GEMAuction is GEMForging, SaleClockAuction {
     // @notice The auction contract variables are defined in GEMBase to allow
     //  us to refer to them in GEMOwnership to prevent accidental transfers.
     // `saleAuction` refers to the auction for gen0 and p2p sale of tkGEMs.
