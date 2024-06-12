@@ -25,7 +25,7 @@ contract GEMCore is GEMAuction {
         }
         require(promoCreatedCount < PROMO_CREATION_LIMIT);
         promoCreatedCount++;
-        _createGEM(0, _shape, GEMOwner);
+        _createGEM(_shape, GEMOwner);
     }
 
     function tkGEMCore() public onlyCEO {
@@ -34,9 +34,7 @@ contract GEMCore is GEMAuction {
         // the creator of the contract is the initial CEO and COO
         ceoAddress = msg.sender;
         cooAddress = msg.sender;
-
-        // start with the mythical GEM 0 - so we don't have generation-0 parent issues
-        _createGEM(0, 0, address(0));
+        _createGEM(0, address(0));
     }
 
     function tkGEMwithdrawBalance() external onlyCFO {

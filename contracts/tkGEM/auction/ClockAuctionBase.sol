@@ -29,7 +29,7 @@ contract ClockAuctionBase is GEMAccessControl {
     ERC721 public nonFungibleContract;
 
     // Reference to contract tracking wtonToken
-    IERC20 public wtonToken;
+    IERC20 public wswtonToken;
 
     // Cut owner takes on each auction, measured in basis points (1/100 of a percent).
     // Values 0-10,000 map to 0%-100%
@@ -42,8 +42,8 @@ contract ClockAuctionBase is GEMAccessControl {
     event AuctionSuccessful(uint256 tokenId, uint256 totalPrice, address winner);
     event AuctionCancelled(uint256 tokenId);
 
-    constructor(address _wtonTokenAddress) {
-        wtonToken = IERC20(_wtonTokenAddress);
+    constructor(address _WSWTONTokenAddress) {
+        wswtonToken = IERC20(_WSWTONTokenAddress);
     }
 
     /// @dev Returns true if the claimant owns the token.
@@ -115,10 +115,10 @@ contract ClockAuctionBase is GEMAccessControl {
             uint256 sellerProceeds = price - auctioneerCut;
 
             // Check allowance and transfer WTON tokens to the seller
-            uint256 allowance = wtonToken.allowance(msg.sender, address(this));
+            uint256 allowance = wswtonToken.allowance(msg.sender, address(this));
             require(allowance >= _bidAmount, "Allowance not sufficient");
 
-            require(wtonToken.transferFrom(msg.sender, seller, sellerProceeds), "Transfer to seller failed");
+            require(wswtonToken.transferFrom(msg.sender, seller, sellerProceeds), "Transfer to seller failed");
         }
 
         // Calculate any excess funds included with the bid. If the excess
@@ -126,7 +126,7 @@ contract ClockAuctionBase is GEMAccessControl {
         uint256 bidExcess = _bidAmount - price;
 
         // Return the excess funds to the bidder
-        require(wtonToken.transferFrom(msg.sender, msg.sender, bidExcess), "Transfer of excess funds failed");
+        require(wswtonToken.transferFrom(msg.sender, msg.sender, bidExcess), "Transfer of excess funds failed");
 
         emit AuctionSuccessful(_tokenId, price, msg.sender);
 

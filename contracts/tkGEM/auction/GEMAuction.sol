@@ -9,7 +9,7 @@ import {GEMForging} from "../GEMForging.sol";
 ///  This wrapper of ReverseAuction exists only so that users can create
 ///  auctions with only one transaction.
 contract GEMAuction is GEMForging, SaleClockAuction {
-    // @notice The auction contract variables are defined in GEMBase to allow
+    // @notice The auction contract variables are defined in GEMStorage to allow
     //  us to refer to them in GEMOwnership to prevent accidental transfers.
     // `saleAuction` refers to the auction for gen0 and p2p sale of tkGEMs.
     // `forgingAuction` refers to the auction for forging rights of tkGEMs.t.
@@ -33,17 +33,8 @@ contract GEMAuction is GEMForging, SaleClockAuction {
         external
         whenNotPaused
     {
-        // Auction contract checks input sizes
-        // If tkGEM is already on any auction, this will throw
-        // because it will be owned by the auction contract.
         require(_owns(msg.sender, _GEMId));
-        // Ensure the tkGEM is not Forging to prevent the auction
-        // contract accidentally receiving ownership of the child.
-        // NOTE: the tkGEM IS allowed to be in a cooldown.
-        require(!isForging(_GEMId));
         _approve(_GEMId, address(saleAuction));
-        // Sale auction throws if inputs are invalid and clears
-        // transfer and sire approval after escrowing the tkGEM.
         saleAuction.createAuction(_GEMId, _startingPrice, _endingPrice, _duration, msg.sender);
     }
 
